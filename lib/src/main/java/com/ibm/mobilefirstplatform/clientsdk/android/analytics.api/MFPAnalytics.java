@@ -76,7 +76,7 @@ public class MFPAnalytics {
     public static final String CATEGORY = "$category";
     public static final String TIMESTAMP_KEY = "$timestamp";
     public static final String APP_SESSION_ID_KEY = "$appSessionID";
-    public static final String USER_ID_KEY = "$userIDHash";
+    public static final String USER_ID_KEY = "$userID";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
 
     /**
