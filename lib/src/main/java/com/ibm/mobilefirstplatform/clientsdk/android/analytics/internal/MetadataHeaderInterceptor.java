@@ -11,7 +11,7 @@
  *     limitations under the License.
  */
 
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;

@@ -11,7 +11,7 @@
  *     limitations under the License.
  */
 
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.squareup.okhttp.Interceptor;
