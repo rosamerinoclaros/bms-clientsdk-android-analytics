@@ -22,6 +22,7 @@ import android.util.Log;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal.MFPAnalyticsActivityLifecycleListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.MFPClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -125,6 +126,8 @@ public final class LogPersister {
 
     private static final String LOG_UPLOADER_PATH = "/analytics-service/rest/data/events/clientlogs/";
     private static final String LOG_UPLOADER_APP_ROUTE = "mobile-analytics-dashboard";
+
+    private static final String FOUNDATION_LOG_UPLOADER_PATH = "/mfp/api/loguploader";
 
     // for internal logging to android.util.Log only, not our log collection
     public static final String LOG_TAG_NAME = LogPersister.class.getName ();
@@ -606,11 +609,11 @@ public final class LogPersister {
      * @param timestamp the number of milliseconds since January 1, 1970, 00:00:00 GMT
      * @param t (optional) an Exception or Throwable, may be null
      */
-    public static void doLog(final Logger.LEVEL calledLevel, String message, final long timestamp, final Throwable t, JSONObject additionalMetadata, final Logger logger) {
+    public static void doLog(final Logger.LEVEL calledLevel, String message, final long timestamp, final Throwable t, JSONObject additionalMetadata, final String loggerName, final boolean isInternalLogger, final Object loggerObject) {
         // we do this outside of the thread, otherwise we can't find the caller to attach the call stack metadata
         JSONObject metadata = appendStackMetadata(additionalMetadata);
 
-        ThreadPoolWorkQueue.execute(new DoLogRunnable(calledLevel, message, timestamp, metadata, t, logger));
+        ThreadPoolWorkQueue.execute(new DoLogRunnable(calledLevel, message, timestamp, metadata, t, loggerName, isInternalLogger, loggerObject));
     }
 
     //endregion
@@ -838,15 +841,19 @@ public final class LogPersister {
         private final long timestamp;
         private final JSONObject metadata;
         private final Throwable t;
-        private final Logger logger;
+        private final Object loggerObject;
+        private final String loggerName;
+        private final boolean isInternalLogger;
 
-        public DoLogRunnable(final Logger.LEVEL calledLevel, final String message, final long timestamp, final JSONObject metadata, final Throwable t, final Logger logger) {
+        public DoLogRunnable(final Logger.LEVEL calledLevel, final String message, final long timestamp, final JSONObject metadata, final Throwable t, final String loggerName, final boolean isInternalLogger, final Object loggerObject) {
             this.calledLevel = calledLevel;
             this.message = message;
             this.timestamp = timestamp;
             this.metadata = metadata;
             this.t = t;
-            this.logger = logger;
+            this.loggerObject = loggerObject;
+            this.loggerName = loggerName;
+            this.isInternalLogger = isInternalLogger;
         }
 
         @Override
@@ -855,23 +862,23 @@ public final class LogPersister {
             boolean canLog = (calledLevel != null) && calledLevel.isLoggable();
 
             if (canLog || (calledLevel == Logger.LEVEL.ANALYTICS)) {
-                LogPersister.captureToFile(LogPersister.createJSONObject(calledLevel, logger.getName(), message, timestamp, metadata, t), calledLevel);
+                LogPersister.captureToFile(LogPersister.createJSONObject(calledLevel, loggerName, message, timestamp, metadata, t), calledLevel);
                 message = (null == message) ? "(null)" : message;  // android.util.Log can't handle null, so protect it
                 message = LogPersister.prependMetadata(message, metadata);
                 switch (calledLevel) {
                     case FATAL:
                     case ERROR:
-                        if (null == t) { Log.e(logger.getName(), message); } else { Log.e(logger.getName(), message, t); }
+                        if (null == t) { Log.e(loggerName, message); } else { Log.e(loggerName, message, t); }
                         break;
                     case WARN:
-                        if (null == t) { Log.w(logger.getName(), message); } else { Log.w(logger.getName(), message, t); }
+                        if (null == t) { Log.w(loggerName, message); } else { Log.w(loggerName, message, t); }
                         break;
                     case INFO:
-                        if (null == t) { Log.i(logger.getName(), message); } else { Log.i(logger.getName(), message, t); }
+                        if (null == t) { Log.i(loggerName, message); } else { Log.i(loggerName, message, t); }
                         break;
                     case DEBUG:
-                        if(!Logger.isInternalLogger(logger) || Logger.isSDKDebugLoggingEnabled()){
-                            if (null == t) { Log.d(logger.getName(), message); } else { Log.d(logger.getName(), message, t); }
+                        if(!isInternalLogger || Logger.isSDKDebugLoggingEnabled()){
+                            if (null == t) { Log.d(loggerName, message); } else { Log.d(loggerName, message, t); }
                         }
                         break;
                     default:
@@ -880,8 +887,8 @@ public final class LogPersister {
             }
             // we do this mostly to enable unit tests to logger.wait(100) instead of
             // Thread.sleep(100) -- it's faster, more stable, and more deterministic that way
-            synchronized(logger) {
-                logger.notifyAll ();
+            synchronized(loggerObject) {
+                loggerObject.notifyAll ();
             }
         }
     }
@@ -955,24 +962,40 @@ public final class LogPersister {
 
             boolean isAnalyticsRequest = fileName.equalsIgnoreCase(LogPersister.ANALYTICS_FILENAME);
 
-            BMSClient client = BMSClient.getInstance();
+            String appRoute;
+            String logUploaderURL;
 
-            String appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + "." + client.getBluemixRegionSuffix();
+            if(!MFPClient.getInstance().isInitialized()){
+                BMSClient client = BMSClient.getInstance();
 
-            String logUploaderURL = appRoute + LOG_UPLOADER_PATH;
+                appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + "." + client.getBluemixRegionSuffix();
+
+                logUploaderURL = appRoute + LOG_UPLOADER_PATH;
+            }
+            else{
+                MFPClient client = MFPClient.getInstance();
+                appRoute = client.getURL();
+
+                logUploaderURL = appRoute + FOUNDATION_LOG_UPLOADER_PATH;
+            }
+
+
 
             SendLogsRequestListener requestListener = new SendLogsRequestListener(fileToSend, listener, isAnalyticsRequest, logUploaderURL);
 
             Request sendLogsRequest = new Request(logUploaderURL, Request.POST);
 
-            sendLogsRequest.addHeader("Content-Type","application/json");
+            sendLogsRequest.addHeader("Content-Type", "text/plain");
 
-            if(MFPAnalytics.getClientApiKey() != null && !MFPAnalytics.getClientApiKey().equalsIgnoreCase("")){
-                sendLogsRequest.addHeader("x-mfp-analytics-api-key", MFPAnalytics.getClientApiKey());
-            }
-            else{
-                requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
-                return;
+            //Client API Key is required to send logs to Bluemix, but not for sending to MobileFirst Platform Foundation.
+            if(!MFPClient.getInstance().isInitialized()){
+                if(MFPAnalytics.getClientApiKey() != null && !MFPAnalytics.getClientApiKey().equalsIgnoreCase("")){
+                    sendLogsRequest.addHeader("x-mfp-analytics-api-key", MFPAnalytics.getClientApiKey());
+                }
+                else{
+                    requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
+                    return;
+                }
             }
 
             sendLogsRequest.send(null, payloadObj.toString(), requestListener);

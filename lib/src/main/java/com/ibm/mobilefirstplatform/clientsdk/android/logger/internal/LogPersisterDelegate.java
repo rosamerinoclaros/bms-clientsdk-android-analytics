@@ -68,6 +68,6 @@ public class LogPersisterDelegate implements LogPersisterInterface {
 
     @Override
     public void doLog(Logger.LEVEL level, String message, long timestamp, Throwable throwable, JSONObject jsonObject, Logger logger) {
-        LogPersister.doLog(level, message, timestamp, throwable, jsonObject, logger);
+        LogPersister.doLog(level, message, timestamp, throwable, jsonObject, logger.getName(), Logger.isInternalLogger(logger), logger);
     }
 }
