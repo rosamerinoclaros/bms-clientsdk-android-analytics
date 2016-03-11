@@ -21,6 +21,7 @@ import android.os.Build;
 import android.provider.Settings;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.MFPClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 import com.squareup.okhttp.Interceptor;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class MetadataHeaderInterceptor implements Interceptor {
+    public static final String ANALYTICS_DEVICE_METADATA_HEADER_NAME = "x-mfp-analytics-metadata";
     protected final JSONObject analyticsMetadataHeaderObject;
 
     public MetadataHeaderInterceptor(Context appContext){
@@ -44,20 +46,30 @@ public class MetadataHeaderInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-
         Request request = chain.request();
 
-        if(MFPAnalytics.getAppName() != null){
-            try {
-                analyticsMetadataHeaderObject.put("mfpAppName", MFPAnalytics.getAppName());
-            } catch (JSONException e) {
-                //App name not recorded.
-            }
-        }
+        Request requestWithHeaders;
 
-        Request requestWithHeaders = request.newBuilder()
-                .header("x-mfp-analytics-metadata", analyticsMetadataHeaderObject.toString())
-                .build();
+        MFPClient mfpClient = MFPClient.getInstance();
+
+        if(mfpClient.isInitialized() && mfpClient.getDeviceMetadataHeader() != null){
+            requestWithHeaders = request.newBuilder()
+                    .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, mfpClient.getDeviceMetadataHeader())
+                    .build();
+        }
+        else{
+            if(MFPAnalytics.getAppName() != null){
+                try {
+                    analyticsMetadataHeaderObject.put("mfpAppName", MFPAnalytics.getAppName());
+                } catch (JSONException e) {
+                    //App name not recorded.
+                }
+            }
+
+            requestWithHeaders = request.newBuilder()
+                    .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, analyticsMetadataHeaderObject.toString())
+                    .build();
+        }
 
         com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
 
