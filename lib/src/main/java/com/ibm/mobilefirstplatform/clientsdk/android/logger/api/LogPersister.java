@@ -20,7 +20,7 @@ import android.content.pm.Signature;
 import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal.MFPAnalyticsActivityLifecycleListener;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.MFPClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
@@ -967,14 +967,22 @@ public final class LogPersister {
 
             if(!MFPClient.getInstance().isInitialized()){
                 BMSClient client = BMSClient.getInstance();
-
-                appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + "." + client.getBluemixRegionSuffix();
+                
+                appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + client.getBluemixRegionSuffix();
+                
+                if (MFPAnalytics.overrideServerHost != null){
+                    appRoute = MFPAnalytics.overrideServerHost;
+                }
 
                 logUploaderURL = appRoute + LOG_UPLOADER_PATH;
             }
             else{
                 MFPClient client = MFPClient.getInstance();
                 appRoute = client.getURL();
+
+                if (MFPAnalytics.overrideServerHost != null){
+                    appRoute = MFPAnalytics.overrideServerHost;
+                }
 
                 logUploaderURL = appRoute + FOUNDATION_LOG_UPLOADER_PATH;
             }

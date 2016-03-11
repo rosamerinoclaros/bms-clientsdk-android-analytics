@@ -16,8 +16,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.provider.Settings;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal.MFPAnalyticsActivityLifecycleListener;
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.internal.MetadataHeaderInterceptor;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MetadataHeaderInterceptor;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.internal.BaseRequest;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
@@ -79,11 +79,16 @@ public class MFPAnalytics {
     public static final String USER_ID_KEY = "$userID";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
 
+	public static String overrideServerHost = null;
+
     /**
      * Set of device attribute changes that MFPAnalytics can register event listeners for.
      */
     public enum DeviceEvent {
-        LIFECYCLE
+		NONE,
+        ALL,
+		LIFECYCLE
+
 //        NETWORK //Note: Temporarily disabled
     }
 
