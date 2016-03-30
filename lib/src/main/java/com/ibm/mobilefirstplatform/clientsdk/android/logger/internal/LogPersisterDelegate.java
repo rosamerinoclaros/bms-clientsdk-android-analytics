@@ -57,8 +57,8 @@ public class LogPersisterDelegate implements LogPersisterInterface {
     }
 
     @Override
-    public void send(ResponseListener responseListener) {
-        LogPersister.send(responseListener);
+    public void send(Object responseListener) {
+        LogPersister.send((ResponseListener)responseListener);
     }
 
     @Override
