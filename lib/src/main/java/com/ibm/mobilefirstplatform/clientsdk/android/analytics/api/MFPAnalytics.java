@@ -88,7 +88,6 @@ public class MFPAnalytics {
 		NONE,
         ALL,
 		LIFECYCLE
-
 //        NETWORK //Note: Temporarily disabled
     }
 
@@ -119,6 +118,11 @@ public class MFPAnalytics {
                 switch(event){
                     case LIFECYCLE:
                         MFPActivityLifeCycleCallbackListener.init(app);
+                        break;
+                    case ALL:
+                        MFPActivityLifeCycleCallbackListener.init(app);
+                        break;
+                    case NONE:
                         break;
                 }
             }
