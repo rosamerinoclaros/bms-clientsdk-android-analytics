@@ -22,7 +22,6 @@ import android.util.Log;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.MFPClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -965,29 +964,15 @@ public final class LogPersister {
             String appRoute;
             String logUploaderURL;
 
-            if(!MFPClient.getInstance().isInitialized()){
-                BMSClient client = BMSClient.getInstance();
-                
-                appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + client.getBluemixRegionSuffix();
-                
-                if (MFPAnalytics.overrideServerHost != null){
-                    appRoute = MFPAnalytics.overrideServerHost;
-                }
+            BMSClient client = BMSClient.getInstance();
 
-                logUploaderURL = appRoute + LOG_UPLOADER_PATH;
-            }
-            else{
-                MFPClient client = MFPClient.getInstance();
-                appRoute = client.getURL();
+            appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + client.getBluemixRegionSuffix();
 
-                if (MFPAnalytics.overrideServerHost != null){
-                    appRoute = MFPAnalytics.overrideServerHost;
-                }
-
-                logUploaderURL = appRoute + FOUNDATION_LOG_UPLOADER_PATH;
+            if (MFPAnalytics.overrideServerHost != null){
+                appRoute = MFPAnalytics.overrideServerHost;
             }
 
-
+            logUploaderURL = appRoute + LOG_UPLOADER_PATH;
 
             SendLogsRequestListener requestListener = new SendLogsRequestListener(fileToSend, listener, isAnalyticsRequest, logUploaderURL);
 
@@ -995,15 +980,12 @@ public final class LogPersister {
 
             sendLogsRequest.addHeader("Content-Type", "text/plain");
 
-            //Client API Key is required to send logs to Bluemix, but not for sending to MobileFirst Platform Foundation.
-            if(!MFPClient.getInstance().isInitialized()){
-                if(MFPAnalytics.getClientApiKey() != null && !MFPAnalytics.getClientApiKey().equalsIgnoreCase("")){
-                    sendLogsRequest.addHeader("x-mfp-analytics-api-key", MFPAnalytics.getClientApiKey());
-                }
-                else{
-                    requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
-                    return;
-                }
+            if(MFPAnalytics.getClientApiKey() != null && !MFPAnalytics.getClientApiKey().equalsIgnoreCase("")){
+                sendLogsRequest.addHeader("x-mfp-analytics-api-key", MFPAnalytics.getClientApiKey());
+            }
+            else{
+                requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
+                return;
             }
 
             sendLogsRequest.send(null, payloadObj.toString(), requestListener);

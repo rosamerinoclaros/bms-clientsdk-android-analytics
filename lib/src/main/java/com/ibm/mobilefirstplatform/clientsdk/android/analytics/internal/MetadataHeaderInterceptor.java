@@ -21,7 +21,6 @@ import android.os.Build;
 import android.provider.Settings;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.MFPClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 import com.squareup.okhttp.Interceptor;
@@ -50,26 +49,18 @@ public class MetadataHeaderInterceptor implements Interceptor {
 
         Request requestWithHeaders;
 
-        MFPClient mfpClient = MFPClient.getInstance();
-
-        if(mfpClient.isInitialized() && mfpClient.getDeviceMetadataHeader() != null){
-            requestWithHeaders = request.newBuilder()
-                    .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, mfpClient.getDeviceMetadataHeader())
-                    .build();
-        }
-        else{
-            if(MFPAnalytics.getAppName() != null){
-                try {
-                    analyticsMetadataHeaderObject.put("mfpAppName", MFPAnalytics.getAppName());
-                } catch (JSONException e) {
-                    //App name not recorded.
-                }
+        if(MFPAnalytics.getAppName() != null){
+            try {
+                analyticsMetadataHeaderObject.put("mfpAppName", MFPAnalytics.getAppName());
+            } catch (JSONException e) {
+                //App name not recorded.
             }
-
-            requestWithHeaders = request.newBuilder()
-                    .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, analyticsMetadataHeaderObject.toString())
-                    .build();
         }
+
+        requestWithHeaders = request.newBuilder()
+                .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, analyticsMetadataHeaderObject.toString())
+                .build();
+
 
         com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
 
