@@ -21,7 +21,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -35,7 +35,9 @@ android {
 }
 
 dependencies {
-    compile('com.ibm.mobilefirstplatform.clientsdk.android:core:2.+')
+    provided('com.ibm.mobilefirstplatform.clientsdk.android:core:2.+@aar'){
+        transitive = true
+    }
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
