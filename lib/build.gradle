@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    provided('com.ibm.mobilefirstplatform.clientsdk.android:core:2.+@aar'){
+    compile('com.ibm.mobilefirstplatform.clientsdk.android:core:2.+@aar'){
         transitive = true
     }
 
