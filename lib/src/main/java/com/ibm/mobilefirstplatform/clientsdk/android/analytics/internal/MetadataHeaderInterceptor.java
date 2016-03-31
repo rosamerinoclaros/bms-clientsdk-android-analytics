@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 import com.squareup.okhttp.Interceptor;
@@ -49,9 +48,9 @@ public class MetadataHeaderInterceptor implements Interceptor {
 
         Request requestWithHeaders;
 
-        if(MFPAnalytics.getAppName() != null){
+        if(BMSAnalytics.getAppName() != null){
             try {
-                analyticsMetadataHeaderObject.put("mfpAppName", MFPAnalytics.getAppName());
+                analyticsMetadataHeaderObject.put("mfpAppName", BMSAnalytics.getAppName());
             } catch (JSONException e) {
                 //App name not recorded.
             }

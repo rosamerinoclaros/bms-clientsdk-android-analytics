@@ -19,7 +19,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.util.Log;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.BMSAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
@@ -682,7 +682,7 @@ public final class LogPersister {
             while(stackTraceElements[index].getClassName().equals (LogPersister.class.getName())
                     || stackTraceElements[index].getClassName().startsWith (JULHandler.class.getName())
                     || stackTraceElements[index].getClassName().startsWith (java.util.logging.Logger.class.getName())
-                    || stackTraceElements[index].getClassName().startsWith (MFPAnalytics.class.getName())) {
+                    || stackTraceElements[index].getClassName().startsWith (BMSAnalytics.class.getName())) {
                 index++;
             }
 
@@ -968,8 +968,8 @@ public final class LogPersister {
 
             appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + client.getBluemixRegionSuffix();
 
-            if (MFPAnalytics.overrideServerHost != null){
-                appRoute = MFPAnalytics.overrideServerHost;
+            if (BMSAnalytics.overrideServerHost != null){
+                appRoute = BMSAnalytics.overrideServerHost;
             }
 
             logUploaderURL = appRoute + LOG_UPLOADER_PATH;
@@ -980,8 +980,8 @@ public final class LogPersister {
 
             sendLogsRequest.addHeader("Content-Type", "text/plain");
 
-            if(MFPAnalytics.getClientApiKey() != null && !MFPAnalytics.getClientApiKey().equalsIgnoreCase("")){
-                sendLogsRequest.addHeader("x-mfp-analytics-api-key", MFPAnalytics.getClientApiKey());
+            if(BMSAnalytics.getClientApiKey() != null && !BMSAnalytics.getClientApiKey().equalsIgnoreCase("")){
+                sendLogsRequest.addHeader("x-mfp-analytics-api-key", BMSAnalytics.getClientApiKey());
             }
             else{
                 requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);

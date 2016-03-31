@@ -15,7 +15,6 @@ package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.os.Handler;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 
@@ -112,9 +111,9 @@ public class MFPAnalyticsActivityLifecycleListener {
             // Create JSON object with start app session metadata
             JSONObject metadata = new JSONObject();
             try {
-                metadata.put(MFPAnalytics.CATEGORY, APP_SESSION_CATEGORY);
+                metadata.put(BMSAnalytics.CATEGORY, APP_SESSION_CATEGORY);
                 metadata.put("timestamp", appUseStartTimestamp);
-                metadata.put(MFPAnalytics.APP_SESSION_ID_KEY, appSessionID);
+                metadata.put(BMSAnalytics.APP_SESSION_ID_KEY, appSessionID);
             } catch (JSONException e) {
                 // should not happen
                 logger.debug("JSONException encountered logging app session: " + e.getMessage());
@@ -144,16 +143,16 @@ public class MFPAnalyticsActivityLifecycleListener {
         // Create JSON object with close app session metadata
         JSONObject metadata = new JSONObject();
         try {
-            metadata.put(MFPAnalytics.CATEGORY, APP_SESSION_CATEGORY);
+            metadata.put(BMSAnalytics.CATEGORY, APP_SESSION_CATEGORY);
             metadata.put(SESSION_DURATION_KEY, timestamp - appUseStartTimestamp);
             metadata.put(CLOSED_BY_KEY, closedBy.toString());
-            metadata.put(MFPAnalytics.APP_SESSION_ID_KEY, appSessionID);
+            metadata.put(BMSAnalytics.APP_SESSION_ID_KEY, appSessionID);
         } catch (JSONException e) {
             // should not happen
             logger.debug("JSONException encountered logging app session: " + e.getMessage());
         }
 
-        MFPAnalytics.log(metadata);
+        BMSAnalytics.log(metadata);
     }
 
     public static String getAppSessionID() {

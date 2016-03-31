@@ -8,7 +8,7 @@
  * been deposited with the U.S. Copyright Office.
  *
  */
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.api;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.app.Activity;
 import android.app.Application;
@@ -16,8 +16,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.provider.Settings;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MetadataHeaderInterceptor;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.internal.BaseRequest;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
@@ -64,7 +63,7 @@ import java.util.UUID;
  * size is greater than zero.  When the log data is successfully uploaded, the persisted local log data is deleted.
  * </p>
  */
-public class MFPAnalytics {
+public class BMSAnalytics {
     protected static final Logger logger = Logger.getLogger(LogPersister.INTERNAL_PREFIX + "analytics");
 
     protected static String clientApiKey = null;
@@ -82,16 +81,6 @@ public class MFPAnalytics {
 	public static String overrideServerHost = null;
 
     /**
-     * Set of device attribute changes that MFPAnalytics can register event listeners for.
-     */
-    public enum DeviceEvent {
-		NONE,
-        ALL,
-		LIFECYCLE
-//        NETWORK //Note: Temporarily disabled
-    }
-
-    /**
      * Initialize MFPAnalytics API.
      * This must be called before any other MFPAnalytics.* methods
      *
@@ -100,7 +89,7 @@ public class MFPAnalytics {
      * @param clientApiKey The Client API Key used to communicate with your MFPAnalytics service.
      * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
      */
-    static public void init(Application app, String applicationName, String clientApiKey, DeviceEvent... contexts) {
+    static public void init(Application app, String applicationName, String clientApiKey, Analytics.DeviceEvent... contexts) {
         Context context = app.getApplicationContext();
 
         //Initialize LogPersister
@@ -111,10 +100,12 @@ public class MFPAnalytics {
         LogPersisterDelegate logPersisterDelegate = new LogPersisterDelegate();
         Logger.setLogPersister(logPersisterDelegate);
 
-        MFPAnalytics.clientApiKey = clientApiKey;
+        Analytics.setAnalyticsDelegate(new BMSAnalyticsDelegate());
+
+        BMSAnalytics.clientApiKey = clientApiKey;
 
         if(contexts != null){
-            for(DeviceEvent event : contexts){
+            for(Analytics.DeviceEvent event : contexts){
                 switch(event){
                     case LIFECYCLE:
                         MFPActivityLifeCycleCallbackListener.init(app);
@@ -168,8 +159,8 @@ public class MFPAnalytics {
 
     /**
      * Send the accumulated log data when the persistent log buffer exists and is not empty.  The data
-     * accumulates in the log buffer from the use of {@link MFPAnalytics} with capture
-     * (see {@link MFPAnalytics#enable()}) turned on.
+     * accumulates in the log buffer from the use of {@link BMSAnalytics} with capture
+     * (see {@link BMSAnalytics#enable()}) turned on.
      *
      */
     public static void send () {
@@ -177,7 +168,7 @@ public class MFPAnalytics {
     }
 
     /**
-     * See {@link MFPAnalytics#send()}
+     * See {@link BMSAnalytics#send()}
      *
      * @param listener RequestListener which specifies an onSuccess callback and an onFailure callback (see {@link ResponseListener})
      */

@@ -13,7 +13,6 @@
 
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.MFPAnalytics;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -39,11 +38,11 @@ public class NetworkLoggingInterceptor implements Interceptor{
         com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
 
 
-        if(MFPAnalytics.isRecordingNetworkEvents){
+        if(BMSAnalytics.isRecordingNetworkEvents){
             JSONObject metadata = generateRoundTripRequestAnalyticsMetadata(request, startTime, trackingID, response);
 
             if(metadata != null){
-                MFPAnalytics.log(metadata);
+                BMSAnalytics.log(metadata);
             }
         }
 
@@ -57,7 +56,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         try {
             metadata.put("$path", request.urlString());
-            metadata.put(MFPAnalytics.CATEGORY, "network");
+            metadata.put(BMSAnalytics.CATEGORY, "network");
             metadata.put("$trackingid", trackingID);
             metadata.put("$outboundTimestamp", startTime);
             metadata.put("$inboundTimestamp", endTime);
