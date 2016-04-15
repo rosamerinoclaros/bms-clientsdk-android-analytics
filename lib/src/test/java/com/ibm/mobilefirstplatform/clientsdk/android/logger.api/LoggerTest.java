@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -791,7 +792,7 @@ public class LoggerTest {
         Logger logger = Logger.getLogger("package");
         LogPersister.setAnalyticsCapture(true);
 
-        logger.analytics("message",null);
+        logger.analytics("message", null);
 
         waitForNotify(logger);
 
@@ -809,6 +810,41 @@ public class LoggerTest {
         // ensure no exception is thrown by parsing the threadid value:
         assertFalse(jsonObject.getLong(THREADID_KEY) == 0);
 
+    }
+
+    @Test
+    public void testLoggerTimestampAccuracy() throws Exception {
+        // make sure the threadpool and queuing inside Logger implementation don't mess with the timestamps
+        FileLoggerMock mockFileLogger = setFileLoggerInstanceField(activity);
+        LogPersister.setContext(activity);
+        LogPersister.setLogLevel(Logger.LEVEL.DEBUG);
+        Logger logger = Logger.getLogger("package");
+        LogPersister.storeLogs(true);
+
+        logger.info("message");
+
+        waitForNotify(logger);
+
+        int timeBetween = 50;
+
+        Thread.sleep(timeBetween);  // make sure next log's timestamp is at least timeBetween later than the prior
+
+        logger.info("message2");
+        waitForNotify(logger);
+
+        JSONArray jsonArray = mockFileLogger.getAccumulatedLogCalls();
+        JSONObject jsonObject1 = jsonArray.getJSONObject(0);
+        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
+
+        // expect Long, not String
+        Long timestamp1 = jsonObject1.getLong(TIMESTAMP_KEY);
+        Long timestamp2 = jsonObject2.getLong(TIMESTAMP_KEY);
+
+        Date date1 = new Date(timestamp1);
+        Date date2 = new Date(timestamp2);
+
+        long dateDifference = date2.getTime() - date1.getTime();
+        assertTrue("Expected date1 to be " + timeBetween + " or more milliseconds before date2, but the difference is only " + dateDifference, dateDifference >= timeBetween);
     }
 
     @Test

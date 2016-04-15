@@ -732,11 +732,8 @@ public final class LogPersister {
      */
     private static JSONObject createJSONObject(final Logger.LEVEL level, final String pkg, final String message, long timestamp, final JSONObject jsonMetadata, final Throwable t) {
         JSONObject jsonObject = new JSONObject();
-        SimpleDateFormat s = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss:S");
-        s.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String format = s.format(timestamp);
         try {
-            jsonObject.put ("timestamp", format);
+            jsonObject.put ("timestamp", timestamp);
             jsonObject.put ("level", level.toString());
             jsonObject.put ("pkg", pkg);
             jsonObject.put ("msg", message);
