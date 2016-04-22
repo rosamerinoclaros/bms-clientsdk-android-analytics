@@ -122,6 +122,8 @@ public class BMSAnalytics {
         //Use device ID as default user ID:
         HASHED_DEFAULT_USER_ID = getDeviceID(context);
 
+        setUserIdentity(HASHED_DEFAULT_USER_ID);
+
         appName = applicationName;
 
 
