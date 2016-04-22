@@ -943,9 +943,6 @@ public final class LogPersister {
 
                 try {
                     byte[] payload = LogPersister.getByteArrayFromFile(fileToSend);
-                    if (payload.length == 0) {
-                        return;  // don't bother sending empty string; return now
-                    }
 
                     payloadObj.put("__logdata", new String(payload, "UTF-8"));
 
