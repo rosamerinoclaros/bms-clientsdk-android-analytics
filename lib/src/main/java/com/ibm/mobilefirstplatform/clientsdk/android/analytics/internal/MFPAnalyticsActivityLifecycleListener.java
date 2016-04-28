@@ -42,7 +42,7 @@ public class MFPAnalyticsActivityLifecycleListener {
     protected static Long appUseStartTimestamp;
     protected static String appSessionID;
 
-    protected static final String SESSION_DURATION_KEY = "timestamp";
+    protected static final String SESSION_DURATION_KEY = "$duration";
     protected static final String APP_SESSION_CATEGORY = "appSession";
     protected static final String CLOSED_BY_KEY = "$closedBy";
 
@@ -112,7 +112,7 @@ public class MFPAnalyticsActivityLifecycleListener {
             JSONObject metadata = new JSONObject();
             try {
                 metadata.put(BMSAnalytics.CATEGORY, APP_SESSION_CATEGORY);
-                metadata.put("$duration", appUseStartTimestamp);
+                metadata.put("timestamp", appUseStartTimestamp);
                 metadata.put(BMSAnalytics.APP_SESSION_ID_KEY, appSessionID);
             } catch (JSONException e) {
                 // should not happen
