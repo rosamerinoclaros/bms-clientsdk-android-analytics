@@ -42,7 +42,7 @@ public class MFPAnalyticsActivityLifecycleListener {
     protected static Long appUseStartTimestamp;
     protected static String appSessionID;
 
-    protected static final String SESSION_DURATION_KEY = "$duration";
+    protected static final String SESSION_DURATION_KEY = "timestamp";
     protected static final String APP_SESSION_CATEGORY = "appSession";
     protected static final String CLOSED_BY_KEY = "$closedBy";
 
