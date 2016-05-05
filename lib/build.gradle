@@ -69,7 +69,7 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-task androidLibraryJar(type: Jar) {
+task androidLibraryJar(type: Jar, dependsOn: assembleRelease) {
     from 'build/intermediates/classes/release/'
     archiveName project.name + '.jar'
     exclude '**/BuildConfig.*'
