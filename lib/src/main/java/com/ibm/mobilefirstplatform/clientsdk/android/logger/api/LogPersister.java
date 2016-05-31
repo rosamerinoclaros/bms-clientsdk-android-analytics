@@ -126,8 +126,6 @@ public final class LogPersister {
     private static final String LOG_UPLOADER_PATH = "/analytics-service/rest/data/events/clientlogs/";
     private static final String LOG_UPLOADER_APP_ROUTE = "mobile-analytics-dashboard";
 
-    private static final String FOUNDATION_LOG_UPLOADER_PATH = "/mfp/api/loguploader";
-
     // for internal logging to android.util.Log only, not our log collection
     public static final String LOG_TAG_NAME = LogPersister.class.getName ();
     private static final String CONTEXT_NULL_MSG = LogPersister.class.getName() + ".setContext(Context) must be called to fully enable debug log capture.  Currently, the 'capture' flag is set but the 'context' field is not.  This warning will only be printed once.";
@@ -980,6 +978,12 @@ public final class LogPersister {
             else{
                 requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
                 return;
+            }
+
+            //Add BMSClient GUID as a header, in order to support P30 Analytics:
+            String guid = BMSClient.getInstance().getBluemixAppGUID();
+            if(guid != null && guid.length() > 0){
+                sendLogsRequest.addHeader("x-analytics-p30-appid", guid);
             }
 
             sendLogsRequest.send(null, payloadObj.toString(), requestListener);
