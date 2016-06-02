@@ -47,8 +47,6 @@ dependencies {
     testCompile 'org.robolectric:shadows-httpclient:3.0'
 }
 
-assembleDebug.dependsOn createPropertiesFile
-
 task createPropertiesFile() {
     def prop = new Properties()
     def propFile = new File("${project.projectDir}/src/main/resources/sdk.properties");
@@ -56,6 +54,8 @@ task createPropertiesFile() {
     prop.setProperty('sdk.version', ANALYTICS_SDK_VERSION)
     prop.store(propFile.newWriter(), null);
 }
+
+assembleDebug.dependsOn createPropertiesFile
 
 task generateJavadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
