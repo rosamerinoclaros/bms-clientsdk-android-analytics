@@ -39,6 +39,14 @@ android {
     }
 }
 
+dependencies {
+    compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:[2.0.0,)'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile 'org.robolectric:shadows-httpclient:3.0'
+}
+
 task createPropertiesFile() {
     def prop = new Properties()
     def propFile = new File("${project.projectDir}/src/main/resources/sdk.properties");
@@ -47,15 +55,7 @@ task createPropertiesFile() {
     prop.store(propFile.newWriter(), null);
 }
 
-dependencies {
-    compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:[2.0.0,)'
-
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'org.robolectric:shadows-httpclient:3.0'
-
-    assembleDebug.dependsOn createPropertiesFile
-}
+assembleDebug.dependsOn createPropertiesFile
 
 task generateJavadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
