@@ -51,7 +51,7 @@ task createPropertiesFile() {
     def prop = new Properties()
     def propFile = new File("${project.projectDir}/src/main/resources/sdk.properties");
 
-    if(propFile.getParentFile() != null && propFile.getParentFile().isDirectory() && !propFile.getParentFile().exists()){
+    if(propFile.getParentFile() != null && !propFile.getParentFile().exists()){
         propFile.getParentFile().mkdirs()
     }
 
