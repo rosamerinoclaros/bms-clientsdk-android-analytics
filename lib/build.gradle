@@ -50,6 +50,11 @@ dependencies {
 task createPropertiesFile() {
     def prop = new Properties()
     def propFile = new File("${project.projectDir}/src/main/resources/sdk.properties");
+
+    if(propFile.getParentFile() != null && propFile.getParentFile().isDirectory() && !propFile.getParentFile().exists()){
+        propFile.getParentFile().mkdirs()
+    }
+
     propFile.createNewFile();
     prop.setProperty('sdk.version', ANALYTICS_SDK_VERSION)
     prop.store(propFile.newWriter(), null);
