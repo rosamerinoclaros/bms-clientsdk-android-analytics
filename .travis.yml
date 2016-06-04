@@ -11,7 +11,7 @@ env:
   - END_TASK=""
 script:
   - if [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      export END_TASK = "uploadArchives";
+      export END_TASK="uploadArchives";
     fi
   - ./gradlew clean assemble test ${END_TASK}
 before_install:
