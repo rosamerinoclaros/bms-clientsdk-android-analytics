@@ -76,6 +76,8 @@ task generateJavadoc(type: Javadoc) {
     options.memberLevel = JavadocMemberLevel.PUBLIC
 
     setTitle 'Bluemix Mobile Services Analytics Android API'
+
+    failOnError = false
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: generateJavadoc) {
