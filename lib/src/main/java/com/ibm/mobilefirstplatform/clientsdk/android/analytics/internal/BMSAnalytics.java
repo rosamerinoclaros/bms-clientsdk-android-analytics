@@ -240,7 +240,8 @@ public class BMSAnalytics {
             if (instance == null) {
                 instance = new MFPActivityLifeCycleCallbackListener();
 
-                app.registerActivityLifecycleCallbacks(instance);
+				app.registerActivityLifecycleCallbacks(instance);
+				MFPAnalyticsActivityLifecycleListener.getInstance().onResume();
             }
         }
 
