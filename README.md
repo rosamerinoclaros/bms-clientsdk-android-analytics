@@ -5,6 +5,9 @@
 
 ##Release Notes:
 
+###1.0.5:
+-Android Nougat officially supported; changed target SDK version to Android 24.
+
 ###1.0.3:
 -Fixed error with App Sessions not being properly counted.
 
