@@ -3,9 +3,11 @@ sudo: required
 android:
   components:
   - tools
-  - build-tools-23.0.2
-  - android-23
+  - build-tools-24.0.2
+  - android-24
   - extra
+jdk:
+  - oraclejdk8
 env:
   global:
   - END_TASK=""
