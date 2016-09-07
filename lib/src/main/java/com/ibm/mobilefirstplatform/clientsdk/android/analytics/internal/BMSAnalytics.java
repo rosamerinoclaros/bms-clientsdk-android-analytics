@@ -68,9 +68,10 @@ public class BMSAnalytics {
 
     protected static String clientApiKey = null;
     protected static String appName = null;
+    protected static boolean hasUserContext = false;
     public static boolean isRecordingNetworkEvents = false;
 
-    protected static String HASHED_DEFAULT_USER_ID;
+    protected static String DEFAULT_USER_ID;
 
     public static final String CATEGORY = "$category";
     public static final String TIMESTAMP_KEY = "$timestamp";
@@ -87,9 +88,10 @@ public class BMSAnalytics {
      * @param app Android Application to instrument with MFPAnalytics.
      * @param applicationName Application's common name.  Should be consistent across platforms.
      * @param clientApiKey The Client API Key used to communicate with your MFPAnalytics service.
+     * @param hasUserContext If true, Analytics only records one user per device. If false, setting the user identity will keep a record of all users.
      * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
      */
-    static public void init(Application app, String applicationName, String clientApiKey, Analytics.DeviceEvent... contexts) {
+    static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, Analytics.DeviceEvent... contexts) {
         Context context = app.getApplicationContext();
 
         //Initialize LogPersister
@@ -119,11 +121,14 @@ public class BMSAnalytics {
             }
         }
 
-        //Use device ID as default user ID:
-        HASHED_DEFAULT_USER_ID = getDeviceID(context);
+        if(hasUserContext) {
+            //Use device ID as default user ID:
+            DEFAULT_USER_ID = getDeviceID(context);
+            setUserIdentity(DEFAULT_USER_ID);
+        }
 
-        setUserIdentity(HASHED_DEFAULT_USER_ID);
 
+        BMSAnalytics.hasUserContext = hasUserContext;
         appName = applicationName;
 
 
@@ -131,10 +136,29 @@ public class BMSAnalytics {
         BaseRequest.registerInterceptor(new MetadataHeaderInterceptor(context.getApplicationContext()));
     }
 
-    static protected String getDeviceID(Context context) {
+    /**
+     * Initialize MFPAnalytics API.
+     * This must be called before any other MFPAnalytics.* methods
+     *
+     * @deprecated  As of release 1.1.0, replaced by {@link #init(Application, String, String, boolean, Analytics.DeviceEvent...)}}
+     * please use the new init with user collection boolean. Using this method will
+     * only collect anonymous users and throw exceptions when trying to set user identity
+     *
+     *
+     * @param app Android Application to instrument with MFPAnalytics.
+     * @param applicationName Application's common name.  Should be consistent across platforms.
+     * @param clientApiKey The Client API Key used to communicate with your MFPAnalytics service.
+     * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
+     */
+    @Deprecated
+    static public void init(Application app, String applicationName, String clientApiKey, Analytics.DeviceEvent... contexts) {
+        init(app, applicationName, clientApiKey, false, contexts);
+    }
+
+        static protected String getDeviceID(Context context) {
         String uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        return UUID.nameUUIDFromBytes(uuid.getBytes()).toString();
+        return uuid;
     }
 
     /**
@@ -189,10 +213,17 @@ public class BMSAnalytics {
 
     /**
      * Specify current application user.  This value will be hashed to ensure privacy.
+     * If your application does not have user context, then nothing will happen.
      *
      * @param user User User id for current app user.
      */
-    public static void setUserIdentity(final String user) {
+    public static void setUserIdentity(final String user){
+
+        if(!BMSAnalytics.hasUserContext){
+            // log it to file:
+            logger.error ("Cannot set user identity with anonymous user collection enabled.");
+            return;
+        }
 
         // Create metadata object to log
         JSONObject metadata = new JSONObject();
@@ -213,11 +244,15 @@ public class BMSAnalytics {
     }
 
     /**
-     * Reset user id to default value.
-     * Use this when user explicitly logs out or is no longer active.
+     * @deprecated As of 1.1.0, going to be removed as of 2.0
+     * since there is anonymous collection and named user collection
+     *
+     * Does not do anything now
      */
+    @Deprecated
     public static void clearUserIdentity() {
-        setUserIdentity(HASHED_DEFAULT_USER_ID);
+        //used to set identity to default, but now, with anonymous, the user is always default, and with
+        //named users, there is no default
     }
 
     public static String getClientApiKey(){

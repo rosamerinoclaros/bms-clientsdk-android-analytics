@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.0:
+-Added new initializer in order to avoid double counting anonymous users and named users as the same. Deprecated `BMSAnalytics.clearUserIdentity()`, will be removed in 2.x.
+
 ###1.0.5:
 -Android Nougat officially supported; changed target SDK version to Android 24.
 
