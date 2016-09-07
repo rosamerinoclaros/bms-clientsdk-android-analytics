@@ -213,6 +213,7 @@ public class BMSAnalytics {
 
     /**
      * Specify current application user.  This value will be hashed to ensure privacy.
+     * If your application does not have user context, then nothing will happen.
      *
      * @param user User User id for current app user.
      */
@@ -220,8 +221,8 @@ public class BMSAnalytics {
 
         if(!BMSAnalytics.hasUserContext){
             // log it to file:
-            logger.fatal ("Cannot set user identity with anonymous user collection enabled.");
-            throw new IllegalStateException("Cannot set user identity with anonymous user collection enabled.");//not checked
+            logger.error ("Cannot set user identity with anonymous user collection enabled.");
+            return;
         }
 
         // Create metadata object to log
