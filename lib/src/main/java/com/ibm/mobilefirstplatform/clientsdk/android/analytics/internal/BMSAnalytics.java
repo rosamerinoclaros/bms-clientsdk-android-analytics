@@ -88,7 +88,7 @@ public class BMSAnalytics {
      * @param app Android Application to instrument with MFPAnalytics.
      * @param applicationName Application's common name.  Should be consistent across platforms.
      * @param clientApiKey The Client API Key used to communicate with your MFPAnalytics service.
-     * @param hasUserContext If true, Analytics only records one user per device. If false, setting the user identity will keep a record of all users.
+     * @param hasUserContext If false, Analytics only records one user per device. If true, setting the user identity will keep a record of all users.
      * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
      */
     static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, Analytics.DeviceEvent... contexts) {
@@ -121,7 +121,7 @@ public class BMSAnalytics {
             }
         }
 
-        if(hasUserContext) {
+        if(!hasUserContext) {
             //Use device ID as default user ID:
             DEFAULT_USER_ID = getDeviceID(context);
             setUserIdentity(DEFAULT_USER_ID);

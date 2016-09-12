@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.1:
+-Changed Javadoc and corrected small logic error
+
 ###1.1.0:
 -Added new initializer in order to avoid double counting anonymous users and named users as the same. Deprecated `BMSAnalytics.clearUserIdentity()`, will be removed in 2.x.
 
