@@ -949,6 +949,8 @@ public final class LogPersister {
                 } catch (JSONException e) {
                     Logger.getLogger(LogPersister.INTERNAL_PREFIX + LOG_TAG_NAME).error("Failed to send logs due to exception.", e);
                 }
+            }else{
+                return;
             }
 
             boolean isAnalyticsRequest = fileName.equalsIgnoreCase(LogPersister.ANALYTICS_FILENAME);
