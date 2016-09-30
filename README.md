@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.2:
+- Fixed problem with `Analytics.init()` where if you set `hasUserContext` to `false`, it would not properly initialize.
+
 ###1.1.1:
 -Changed Javadoc and corrected small logic error
 
