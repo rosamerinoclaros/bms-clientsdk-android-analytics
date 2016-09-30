@@ -122,9 +122,12 @@ public class BMSAnalytics {
         }
 
         if(!hasUserContext) {
+            //set user context to true so that we can set it with the default id
+            BMSAnalytics.hasUserContext = true;
             //Use device ID as default user ID:
             DEFAULT_USER_ID = getDeviceID(context);
             setUserIdentity(DEFAULT_USER_ID);
+            BMSAnalytics.hasUserContext = false;
         }
 
 
@@ -155,7 +158,7 @@ public class BMSAnalytics {
         init(app, applicationName, clientApiKey, false, contexts);
     }
 
-        static protected String getDeviceID(Context context) {
+    static protected String getDeviceID(Context context) {
         String uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         return uuid;
