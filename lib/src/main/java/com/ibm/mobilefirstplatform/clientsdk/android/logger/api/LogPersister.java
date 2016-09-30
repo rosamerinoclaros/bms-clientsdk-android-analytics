@@ -950,7 +950,7 @@ public final class LogPersister {
                     Logger.getLogger(LogPersister.INTERNAL_PREFIX + LOG_TAG_NAME).error("Failed to send logs due to exception.", e);
                 }
             }else{
-                return;
+                continue;
             }
 
             boolean isAnalyticsRequest = fileName.equalsIgnoreCase(LogPersister.ANALYTICS_FILENAME);
@@ -990,6 +990,7 @@ public final class LogPersister {
 
             sendLogsRequest.send(null, payloadObj.toString(), requestListener);
         }
+        listener.onSuccess(null);
     }
 
     static class SendLogsRequestListener implements ResponseListener {
