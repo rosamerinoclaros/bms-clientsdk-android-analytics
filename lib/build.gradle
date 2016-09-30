@@ -61,6 +61,7 @@ task createPropertiesFile() {
 }
 
 assembleDebug.dependsOn createPropertiesFile
+assembleRelease.dependsOn createPropertiesFile
 
 task generateJavadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
