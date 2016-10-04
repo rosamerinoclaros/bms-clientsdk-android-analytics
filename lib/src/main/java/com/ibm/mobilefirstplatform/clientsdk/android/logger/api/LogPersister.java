@@ -902,6 +902,9 @@ public final class LogPersister {
             return;
         }
 
+        //Using this to determine if at least one file was sent to the server
+        int amountOfLogFilesSentToServer = 0;
+
         // java.util.logging.FileHandler can roll over.
         // We should send the oldest logs first
         for (int i = LogPersister.MAX_NUM_LOG_FILES - 1; i > -1; i--) {
@@ -989,8 +992,14 @@ public final class LogPersister {
             }
 
             sendLogsRequest.send(null, payloadObj.toString(), requestListener);
+
+            amountOfLogFilesSentToServer += 1;
         }
-        listener.onSuccess(null);
+
+        //If no files were sent to the server and this was reached with no errors, it means that the onSuccess should be called if it exists.
+        if(listener != null && amountOfLogFilesSentToServer <= 0){
+            listener.onSuccess(null);
+        }
     }
 
     static class SendLogsRequestListener implements ResponseListener {

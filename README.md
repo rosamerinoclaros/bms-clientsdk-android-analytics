@@ -6,20 +6,23 @@
 
 ##Release Notes:
 
+###1.1.3:
+- Fixed NullPointerException when calling `Analytics.send()` or `Logger.send()` without a response listener.
+
 ###1.1.2:
 - Fixed problem with `Analytics.init()` where if you set `hasUserContext` to `false`, it would not properly initialize.
 
 ###1.1.1:
--Changed Javadoc and corrected small logic error
+- Changed Javadoc and corrected small logic error
 
 ###1.1.0:
--Added new initializer in order to avoid double counting anonymous users and named users as the same. Deprecated `BMSAnalytics.clearUserIdentity()`, will be removed in 2.x.
+- Added new initializer in order to avoid double counting anonymous users and named users as the same. Deprecated `BMSAnalytics.clearUserIdentity()`, will be removed in 2.x.
 
 ###1.0.5:
--Android Nougat officially supported; changed target SDK version to Android 24.
+- Android Nougat officially supported; changed target SDK version to Android 24.
 
 ###1.0.3:
--Fixed error with App Sessions not being properly counted.
+- Fixed error with App Sessions not being properly counted.
 
 Known limitation - currently v2.x of Android SDK does not submit monitoring data. This is a work in progress and will be delivered in following months. If you’d like to continue receiving monitoring data in the service dashboard you can continue using the v1.x SDK.
 
