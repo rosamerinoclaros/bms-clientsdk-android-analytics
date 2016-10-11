@@ -5,6 +5,9 @@
 
 ##Release Notes:
 
+###1.1.4:
+- Fixed issue regarding an exception log that was being shown when reading the SDK version number.
+
 ###1.1.3:
 - Fixed NullPointerException when calling `Analytics.send()` or `Logger.send()` without a response listener.
 
