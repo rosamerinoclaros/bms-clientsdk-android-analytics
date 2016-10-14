@@ -82,8 +82,8 @@ public class BMSAnalytics {
 	public static String overrideServerHost = null;
 
     /**
-     * Initialize MFPAnalytics API.
-     * This must be called before any other MFPAnalytics.* methods
+     * Initialize BMSAnalytics API.
+     * This must be called before any other BMSAnalytics.* methods
      *
      * @param app Android Application to instrument with MFPAnalytics.
      * @param applicationName Application's common name.  Should be consistent across platforms.
@@ -112,8 +112,12 @@ public class BMSAnalytics {
                     case LIFECYCLE:
                         MFPActivityLifeCycleCallbackListener.init(app);
                         break;
+                    case NETWORK:
+                        isRecordingNetworkEvents = true;
+                        break;
                     case ALL:
                         MFPActivityLifeCycleCallbackListener.init(app);
+                        isRecordingNetworkEvents = true;
                         break;
                     case NONE:
                         break;
@@ -137,6 +141,7 @@ public class BMSAnalytics {
 
         //Intercept requests to add device metadata header
         BaseRequest.registerInterceptor(new MetadataHeaderInterceptor(context.getApplicationContext()));
+        BaseRequest.registerInterceptor(new NetworkLoggingInterceptor());
     }
 
     /**

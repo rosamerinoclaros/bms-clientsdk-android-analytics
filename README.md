@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.5:
+- Added the ability to record network transactions by using `Analytics.DeviceEvent.NETWORK` as one of the device events when calling `Analytics.initialize()`.
+
 ###1.1.4:
 - Fixed issue regarding an exception log that was being shown when reading the SDK version number.
 
