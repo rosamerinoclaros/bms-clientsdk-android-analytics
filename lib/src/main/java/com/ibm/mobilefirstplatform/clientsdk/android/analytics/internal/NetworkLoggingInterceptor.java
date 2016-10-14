@@ -15,6 +15,7 @@ package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
@@ -31,9 +32,15 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         String trackingID = UUID.randomUUID().toString();
 
-        Request requestWithHeaders = request.newBuilder()
-                .header("x-wl-analytics-tracking-id", trackingID)
-                .build();
+        Request.Builder requestWithHeadersBuilder = request.newBuilder()
+                .header("x-wl-analytics-tracking-id", trackingID);
+
+        //Add the Analytics API key to all outbound requests, so that Push and MCA can use it to log things with the Analytics service
+        if(BMSAnalytics.getClientApiKey() != null && !BMSAnalytics.getClientApiKey().equalsIgnoreCase("")){
+            requestWithHeadersBuilder.addHeader("x-mfp-analytics-api-key", BMSAnalytics.getClientApiKey());
+        }
+
+        Request requestWithHeaders = requestWithHeadersBuilder.build();
 
         com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
 
@@ -61,6 +68,12 @@ public class NetworkLoggingInterceptor implements Interceptor{
             metadata.put("$outboundTimestamp", startTime);
             metadata.put("$inboundTimestamp", endTime);
             metadata.put("$roundTripTime", endTime - startTime);
+
+            RequestBody body = request.body();
+
+            if(body != null){
+                metadata.put("$bytesSent", body.contentLength());
+            }
 
             if(response != null){
                 metadata.put("$responseCode", response.code());
