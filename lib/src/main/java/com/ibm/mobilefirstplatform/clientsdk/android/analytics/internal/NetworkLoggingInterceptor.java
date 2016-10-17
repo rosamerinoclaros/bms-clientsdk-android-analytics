@@ -37,6 +37,8 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         //Add the Analytics API key to all outbound requests, so that Push and MCA can use it to log things with the Analytics service
         if(BMSAnalytics.getClientApiKey() != null && !BMSAnalytics.getClientApiKey().equalsIgnoreCase("")){
+            //Remove header in case it exists.
+            requestWithHeadersBuilder.removeHeader("x-mfp-analytics-api-key");
             requestWithHeadersBuilder.addHeader("x-mfp-analytics-api-key", BMSAnalytics.getClientApiKey());
         }
 

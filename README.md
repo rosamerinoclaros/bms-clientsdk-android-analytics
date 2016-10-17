@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.6
+- Fixed issue where developers would get a 403 when sending logs/analytics to the Mobile Analytics service.
+
 ###1.1.5:
 - Added the ability to record network transactions by using `Analytics.DeviceEvent.NETWORK` as one of the device events when calling `Analytics.initialize()`.
 
