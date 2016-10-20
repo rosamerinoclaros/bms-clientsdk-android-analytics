@@ -46,8 +46,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
 
-
-        if(BMSAnalytics.isRecordingNetworkEvents){
+        if(BMSAnalytics.isRecordingNetworkEvents && requestShouldBeLogged(request)){
             JSONObject metadata = generateRoundTripRequestAnalyticsMetadata(request, startTime, trackingID, response);
 
             if(metadata != null){
@@ -56,6 +55,19 @@ public class NetworkLoggingInterceptor implements Interceptor{
         }
 
         return response;
+    }
+
+    /**
+     * All requests should be logged in the network transaction monitoring except calls to the Analytics service.
+     * @param request the request being intercepted
+     * @return true if it is a request that is not going to the Analytics service
+     */
+    private boolean requestShouldBeLogged(Request request) {
+        boolean transactionShouldBeLogged;
+
+        transactionShouldBeLogged = request != null && request.urlString() != null && !request.urlString().contains("/analytics-service");
+
+        return transactionShouldBeLogged;
     }
 
     protected JSONObject generateRoundTripRequestAnalyticsMetadata(Request request, long startTime, String trackingID, Response response) throws IOException {
