@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.1.7
+- Change network transaction monitoring so that calls to the Analytics service are not logged.
+
 ###1.1.6
 - Fixed issue where developers would get a 403 when sending logs/analytics to the Mobile Analytics service.
 
