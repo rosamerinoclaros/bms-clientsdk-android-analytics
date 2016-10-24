@@ -5,6 +5,9 @@
 
 ##Release Notes:
 
+###1.1.8
+- Reverted back to also monitoring calls to the Analytics service.
+
 ###1.1.7
 - Change network transaction monitoring so that calls to the Analytics service are not logged.
 
