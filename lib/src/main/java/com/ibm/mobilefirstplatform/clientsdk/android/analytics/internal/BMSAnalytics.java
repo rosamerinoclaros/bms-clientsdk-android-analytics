@@ -127,12 +127,9 @@ public class BMSAnalytics {
         }
 
         if(!hasUserContext) {
-            //set user context to true so that we can set it with the default id
-            BMSAnalytics.hasUserContext = true;
             //Use device ID as default user ID:
             DEFAULT_USER_ID = getDeviceID(context);
             setUserIdentity(DEFAULT_USER_ID, true);
-            BMSAnalytics.hasUserContext = false;
         }
 
 
@@ -229,7 +226,7 @@ public class BMSAnalytics {
      */
     private static void setUserIdentity(final String user, boolean isInitialCtx){
 
-        if(!BMSAnalytics.hasUserContext){
+        if (!isInitialCtx && !BMSAnalytics.hasUserContext) {
             // log it to file:
             logger.error ("Cannot set user identity with anonymous user collection enabled.");
             return;
