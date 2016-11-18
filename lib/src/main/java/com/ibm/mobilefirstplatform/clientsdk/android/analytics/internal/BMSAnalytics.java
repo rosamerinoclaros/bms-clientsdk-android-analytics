@@ -78,6 +78,7 @@ public class BMSAnalytics {
     public static final String APP_SESSION_ID_KEY = "$appSessionID";
     public static final String USER_ID_KEY = "$userID";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
+    public static final String INITIAL_CTX_CATEGORY = "initialCtx";
 
 	public static String overrideServerHost = null;
 
@@ -126,12 +127,9 @@ public class BMSAnalytics {
         }
 
         if(!hasUserContext) {
-            //set user context to true so that we can set it with the default id
-            BMSAnalytics.hasUserContext = true;
             //Use device ID as default user ID:
             DEFAULT_USER_ID = getDeviceID(context);
-            setUserIdentity(DEFAULT_USER_ID);
-            BMSAnalytics.hasUserContext = false;
+            setUserIdentity(DEFAULT_USER_ID, true);
         }
 
 
@@ -224,10 +222,11 @@ public class BMSAnalytics {
      * If your application does not have user context, then nothing will happen.
      *
      * @param user User User id for current app user.
+     * @param isInitialCtx True if it's a user in the initial context (i.e. when app first starts)
      */
-    public static void setUserIdentity(final String user){
+    private static void setUserIdentity(final String user, boolean isInitialCtx){
 
-        if(!BMSAnalytics.hasUserContext){
+        if (!isInitialCtx && !BMSAnalytics.hasUserContext) {
             // log it to file:
             logger.error ("Cannot set user identity with anonymous user collection enabled.");
             return;
@@ -239,7 +238,11 @@ public class BMSAnalytics {
         String hashedUserID = UUID.nameUUIDFromBytes(user.getBytes()).toString();
 
         try {
-            metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
+            if (isInitialCtx) {
+                metadata.put(CATEGORY, INITIAL_CTX_CATEGORY);
+            } else {
+                metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
+            }
             metadata.put(TIMESTAMP_KEY, (new Date()).getTime());
             metadata.put(APP_SESSION_ID_KEY, MFPAnalyticsActivityLifecycleListener.getAppSessionID());
             metadata.put(USER_ID_KEY, hashedUserID);
@@ -249,6 +252,16 @@ public class BMSAnalytics {
         }
 
         log(metadata);
+    }
+
+    /**
+     * Specify current application user.  This value will be hashed to ensure privacy.
+     * If your application does not have user context, then nothing will happen.
+     *
+     * @param user User User id for current app user.
+     */
+    public static void setUserIdentity(final String user){
+        setUserIdentity(user, false);
     }
 
     /**
