@@ -5,6 +5,9 @@
 
 ##Release Notes:
 
+###1.1.9
+- Fixed issue where application session timestamp was not being correctly recorded.
+
 ###1.1.8
 - Reverted back to also monitoring calls to the Analytics service.
 
