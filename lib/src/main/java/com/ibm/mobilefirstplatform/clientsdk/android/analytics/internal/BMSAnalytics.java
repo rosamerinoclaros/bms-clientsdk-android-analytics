@@ -140,6 +140,8 @@ public class BMSAnalytics {
         //Intercept requests to add device metadata header
         BaseRequest.registerInterceptor(new MetadataHeaderInterceptor(context.getApplicationContext()));
         BaseRequest.registerInterceptor(new NetworkLoggingInterceptor());
+
+        enable();
     }
 
     /**
