@@ -70,11 +70,17 @@ public class BMSAnalytics {
     protected static String appName = null;
     protected static boolean hasUserContext = false;
     public static boolean isRecordingNetworkEvents = false;
+    public static boolean locationEnabled = false;
+    public static MFPAnalyticsLocationListener locationService = null;
+
 
     protected static String DEFAULT_USER_ID;
 
     public static final String CATEGORY = "$category";
     public static final String TIMESTAMP_KEY = "$timestamp";
+    public static final String LONGITUDE_KEY = "$longitude";
+    public static final String LATITUDE_KEY = "$latitude";
+
     public static final String APP_SESSION_ID_KEY = "$appSessionID";
     public static final String USER_ID_KEY = "$userID";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
@@ -94,6 +100,7 @@ public class BMSAnalytics {
      */
     static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, Analytics.DeviceEvent... contexts) {
         Context context = app.getApplicationContext();
+        locationService = MFPAnalyticsLocationListener.getInstance(context);
 
         //Initialize LogPersister
         LogPersister.setLogLevel(Logger.getLogLevel());
@@ -135,6 +142,10 @@ public class BMSAnalytics {
 
         BMSAnalytics.hasUserContext = hasUserContext;
         appName = applicationName;
+
+        if(BMSAnalytics.locationEnabled){
+            locationService.init();
+        }
 
 
         //Intercept requests to add device metadata header
@@ -198,6 +209,9 @@ public class BMSAnalytics {
      *
      */
     public static void send () {
+        if(BMSAnalytics.locationEnabled){
+            locationService.unregister();
+        }
         LogPersister.sendAnalytics(null);
     }
 
@@ -245,6 +259,11 @@ public class BMSAnalytics {
             } else {
                 metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
             }
+            if(BMSAnalytics.locationEnabled){
+                metadata.put(LONGITUDE_KEY, locationService.getLongitude());
+                metadata.put(LATITUDE_KEY, locationService.getLatitude());
+            }
+
             metadata.put(TIMESTAMP_KEY, (new Date()).getTime());
             metadata.put(APP_SESSION_ID_KEY, MFPAnalyticsActivityLifecycleListener.getAppSessionID());
             metadata.put(USER_ID_KEY, hashedUserID);

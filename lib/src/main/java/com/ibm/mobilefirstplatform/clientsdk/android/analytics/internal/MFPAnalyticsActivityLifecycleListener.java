@@ -14,6 +14,7 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.os.Handler;
+import android.support.annotation.RequiresPermission;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
@@ -68,6 +69,7 @@ public class MFPAnalyticsActivityLifecycleListener {
         appSessionID = null;
     }
 
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
     public void onResume() {
         isPaused = false;
 
@@ -101,6 +103,7 @@ public class MFPAnalyticsActivityLifecycleListener {
         }, ACTIVITY_DELAY);
     }
 
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
     protected void logAppForeground() {
         if (appUseStartTimestamp == null) {
             appUseStartTimestamp = (new Date()).getTime();
@@ -114,6 +117,11 @@ public class MFPAnalyticsActivityLifecycleListener {
                 metadata.put(BMSAnalytics.CATEGORY, APP_SESSION_CATEGORY);
                 metadata.put(BMSAnalytics.TIMESTAMP_KEY, appUseStartTimestamp);
                 metadata.put(BMSAnalytics.APP_SESSION_ID_KEY, appSessionID);
+
+                if(BMSAnalytics.locationEnabled){
+                    metadata.put(BMSAnalytics.LONGITUDE_KEY, BMSAnalytics.locationService.getLongitude());
+                    metadata.put(BMSAnalytics.LATITUDE_KEY, BMSAnalytics.locationService.getLatitude());
+                }
             } catch (JSONException e) {
                 // should not happen
                 logger.debug("JSONException encountered logging app session: " + e.getMessage());
