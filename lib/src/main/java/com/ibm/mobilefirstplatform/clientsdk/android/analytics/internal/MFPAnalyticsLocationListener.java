@@ -147,8 +147,15 @@ public class MFPAnalyticsLocationListener implements LocationListener {
         }
 
         //Check accuracy (the higher the number the lower the accuracy)
-        int accuracy = (int) (newLocation.getAccuracy() - oldLocation.getAccur
-                \   
+        int accuracy = (int) (newLocation.getAccuracy() - oldLocation.getAccuracy());
+        boolean isLessAccurate = accuracy > 0;
+        boolean isMoreAccurate = accuracy < 0;
+        boolean isVeryInaccurate = accuracy > 200;
+
+        if(isMoreAccurate){
+            return true;
+        } else if (isNew && !isLessAccurate){
+            return true;
         } else if(isNew && !isVeryInaccurate){
             return true;
         }
