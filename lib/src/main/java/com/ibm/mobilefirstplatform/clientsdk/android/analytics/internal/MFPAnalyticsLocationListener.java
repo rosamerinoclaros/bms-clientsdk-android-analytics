@@ -1,19 +1,20 @@
 /*
- *     Copyright 2015 IBM Corp.
- *     Licensed under the Apache License, Version 2.0 (the "License");
- *     you may not use this file except in compliance with the License.
- *     You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- *     Unless required by applicable law or agreed to in writing, software
- *     distributed under the License is distributed on an "AS IS" BASIS,
- *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *     See the License for the specific language governing permissions and
- *     limitations under the License.
+ *     Copyright 2015 IBM Corp.
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
  */
 
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -21,6 +22,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.content.Context;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
@@ -30,6 +32,8 @@ public class MFPAnalyticsLocationListener implements LocationListener {
 
     protected static Logger logger = Logger.getLogger(LogPersister.INTERNAL_PREFIX + MFPAnalyticsLocationListener.class.getSimpleName());
     private static MFPAnalyticsLocationListener instance = null;
+
+    private String REQUEST_LOG = "Request location updates for ";
 
     private int TIME_DELAY = 1000 * 60 * 2; //2 min
 
@@ -50,24 +54,30 @@ public class MFPAnalyticsLocationListener implements LocationListener {
         }
 
 
+
         return instance;
     }
 
-    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
     public void init(){
-
-        if(isNetworkEnabled() && checkPermission()){
+        if(isNetworkEnabled() && checkPermission()) {
             initLocationRequests = true;
-            logger.info("Init network request");
+            logger.info(REQUEST_LOG + "network provider");
             manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, instance);
+        } else if(isGPSEnabled() && checkPermission()){
+            initLocationRequests = true;
+            logger.info(REQUEST_LOG + "GPS provider");
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0 , instance);
+        } else {
+            logger.error("Check to see if your location permissions have been enabled.");
         }
 
     }
 
-    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
-    public void unregister(){
+    public static void unregister(){
         if(checkPermission() && instance != null){
             manager.removeUpdates(instance);
+        } else {
+            logger.error("Check to see if your location permissions have been enabled.");
         }
     }
 
@@ -106,23 +116,33 @@ public class MFPAnalyticsLocationListener implements LocationListener {
         return manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
+    public boolean isGPSEnabled() {
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
     public double getLatitude(){
         if(checkPermission() && bestLocation == null && initLocationRequests){
-            return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude();
+            if(isGPSEnabled()){
+                return manager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+            } else if(isNetworkEnabled()){
+                return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude();
+            }
         } else if(!checkPermission() || !initLocationRequests){
-            throw new SecurityException("Check to see if your location permissions have been enabled or called the init method");
+            logger.error("Check to see if your location permissions have been enabled.");
         }
 
         return bestLocation.getLatitude();
     }
 
-    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
     public double getLongitude() throws SecurityException{
-        if(checkPermission() && bestLocation == null){
-            return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude();
+        if(checkPermission() && bestLocation == null && initLocationRequests){
+            if(isGPSEnabled()){
+                return manager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+            } else if (isNetworkEnabled()) {
+                return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude();
+            }
         } else if(!checkPermission() && bestLocation == null){
-            throw new SecurityException("Check to see if your location permissions have been enabled");
+            logger.error("Check to see if your location permissions have been enabled.");
         }
 
         return bestLocation.getLongitude();
@@ -163,13 +183,16 @@ public class MFPAnalyticsLocationListener implements LocationListener {
         return false;
     }
 
-    private boolean checkPermission() {
-        return Build.VERSION.SDK_INT >= 23 &&
+    private static boolean checkPermission() {
+        return !(Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission(Context, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
                         PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED;
+                        PackageManager.PERMISSION_GRANTED);
+    }
+
+    public boolean getInitLocationRequests(){
+        return initLocationRequests;
     }
 }
-
 

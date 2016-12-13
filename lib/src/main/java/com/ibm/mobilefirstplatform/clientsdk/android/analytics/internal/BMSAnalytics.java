@@ -70,7 +70,7 @@ public class BMSAnalytics {
     protected static String appName = null;
     protected static boolean hasUserContext = false;
     public static boolean isRecordingNetworkEvents = false;
-    public static boolean locationEnabled = false;
+    public static boolean collectLocation = false;
     public static MFPAnalyticsLocationListener locationService = null;
 
 
@@ -83,6 +83,7 @@ public class BMSAnalytics {
 
     public static final String APP_SESSION_ID_KEY = "$appSessionID";
     public static final String USER_ID_KEY = "$userID";
+    public static final String LOG_LOCATION_KEY = "loglocation";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
     public static final String INITIAL_CTX_CATEGORY = "initialCtx";
 
@@ -96,9 +97,10 @@ public class BMSAnalytics {
      * @param applicationName Application's common name.  Should be consistent across platforms.
      * @param clientApiKey The Client API Key used to communicate with your MFPAnalytics service.
      * @param hasUserContext If false, Analytics only records one user per device. If true, setting the user identity will keep a record of all users.
+     * @param collectLocation If true, Analytics will begin to record location metadeta
      * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
      */
-    static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, Analytics.DeviceEvent... contexts) {
+    static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, boolean collectLocation, Analytics.DeviceEvent... contexts) {
         Context context = app.getApplicationContext();
         locationService = MFPAnalyticsLocationListener.getInstance(context);
 
@@ -139,14 +141,14 @@ public class BMSAnalytics {
             setUserIdentity(DEFAULT_USER_ID, true);
         }
 
-
-        BMSAnalytics.hasUserContext = hasUserContext;
-        appName = applicationName;
-
-        if(BMSAnalytics.locationEnabled){
+        if(collectLocation){
+            BMSAnalytics.collectLocation = collectLocation;
             locationService.init();
         }
 
+
+        BMSAnalytics.hasUserContext = hasUserContext;
+        appName = applicationName;
 
         //Intercept requests to add device metadata header
         BaseRequest.registerInterceptor(new MetadataHeaderInterceptor(context.getApplicationContext()));
@@ -159,7 +161,7 @@ public class BMSAnalytics {
      * Initialize MFPAnalytics API.
      * This must be called before any other MFPAnalytics.* methods
      *
-     * @deprecated  As of release 1.1.0, replaced by {@link #init(Application, String, String, boolean, Analytics.DeviceEvent...)}}
+     * @deprecated  As of release 1.1.0, replaced by {@link #init(Application, String, String, boolean, boolean, Analytics.DeviceEvent...)}}
      * please use the new init with user collection boolean. Using this method will
      * only collect anonymous users and throw exceptions when trying to set user identity
      *
@@ -171,7 +173,7 @@ public class BMSAnalytics {
      */
     @Deprecated
     static public void init(Application app, String applicationName, String clientApiKey, Analytics.DeviceEvent... contexts) {
-        init(app, applicationName, clientApiKey, false, contexts);
+        init(app, applicationName, clientApiKey, false, false, contexts);
     }
 
     static protected String getDeviceID(Context context) {
@@ -209,9 +211,7 @@ public class BMSAnalytics {
      *
      */
     public static void send () {
-        if(BMSAnalytics.locationEnabled){
-            locationService.unregister();
-        }
+        locationService.unregister();
         LogPersister.sendAnalytics(null);
     }
 
@@ -231,6 +231,29 @@ public class BMSAnalytics {
      */
     public static void log (final JSONObject eventDescription) {
         logger.analytics("", eventDescription);
+    }
+
+    /**
+     * Log location event
+     */
+    public static void logLocation(){
+        if(!BMSAnalytics.collectLocation){
+            logger.error("You must enable collectLocation before location can be logged");
+            return;
+        }
+
+        // Create metadata object to log
+        JSONObject metadata = new JSONObject();
+
+        try {
+            metadata.put(CATEGORY, LOG_LOCATION_KEY);
+
+        } catch(JSONException e){
+            logger.debug("JSONException encountered logging change in user context: " + e.getMessage());
+        }
+
+        log(metadata);
+
     }
 
     /**
@@ -259,7 +282,7 @@ public class BMSAnalytics {
             } else {
                 metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
             }
-            if(BMSAnalytics.locationEnabled){
+            if(BMSAnalytics.collectLocation && locationService.getInitLocationRequests()){
                 metadata.put(LONGITUDE_KEY, locationService.getLongitude());
                 metadata.put(LATITUDE_KEY, locationService.getLatitude());
             }
