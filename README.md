@@ -6,6 +6,9 @@
 
 ##Release Notes:
 
+###1.2.0
+- Added location for log recording
+
 ###1.1.10
 - Fixed issue where Analytics log recording was not being enabled when initializing.
 

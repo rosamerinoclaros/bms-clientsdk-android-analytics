@@ -18,7 +18,7 @@ apply plugin: 'signing'
 
 ext {
     ANALYTICS_VERSION_VAR_NAME = 'BMS_ANALYTICS_SDK_VERSION'
-    ANALYTICS_SDK_VERSION = '1.1.10-SNAPSHOT'
+    ANALYTICS_SDK_VERSION = '1.2.0-SNAPSHOT'
 }
 
 android {
@@ -37,6 +37,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
 }
 
 dependencies {
