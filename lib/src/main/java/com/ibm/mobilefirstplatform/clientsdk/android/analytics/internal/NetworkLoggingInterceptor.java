@@ -71,6 +71,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
             metadata.put("$roundTripTime", endTime - startTime);
 
             RequestBody body = request.body();
+            metadata.put("$requestMethod", request.method());
 
             if(body != null){
                 metadata.put("$bytesSent", body.contentLength());
