@@ -19,16 +19,15 @@ import org.json.JSONObject;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 
 public class NetworkLoggingInterceptorTest {
-  final CountDownLatch latch = new CountDownLatch(1);
+   private CountDownLatch latch;
   
   @Test
   public void testInterceptor() throws Exception{ 
-           
+    latch = new CountDownLatch(1);
+    
     MockWebServer mockServer = new MockWebServer();
     MockResponse mresponse = new MockResponse().setResponseCode(200);
     for (int i = 0; i <= 10; i++) {
@@ -65,8 +64,8 @@ public class NetworkLoggingInterceptorTest {
     public String requestMethod = "";
     public int responseCode = 0;
     public String category = "";
-    @Override public com.squareup.okhttp.Response intercept(Interceptor.Chain chain) throws IOException {
-      com.squareup.okhttp.Response response =  super.intercept(chain);
+    @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+      Response response =  super.intercept(chain);
       return response;
     }
     @Override
