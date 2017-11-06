@@ -2,10 +2,10 @@ package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.BMSAnalytics;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Interceptor;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -37,15 +37,15 @@ public class NetworkLoggingInterceptorTest {
     
     String urlString = mockServer.url("").toString();
 
-    OkHttpClient client = new OkHttpClient();
-    client.setReadTimeout(10, TimeUnit.SECONDS);
-    client.setWriteTimeout(10, TimeUnit.SECONDS);
-    
-    
     BMSAnalytics.isRecordingNetworkEvents = true;
     NetworkLoggingInterceptorLocal interceptor = new NetworkLoggingInterceptorLocal();
     
-    client.interceptors().add(interceptor);
+    OkHttpClient client = new OkHttpClient.Builder()
+        .addInterceptor(interceptor)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build();
 
     Request request = new Request.Builder().url(urlString).build();
     

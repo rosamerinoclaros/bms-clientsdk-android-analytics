@@ -55,12 +55,17 @@ android {
 }
 
 dependencies {
-    compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:[2.0.0,3.0.0)'
+    //compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:[2.0.0,3.0.0)'
+    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.okhttp3:okhttp-urlconnection:3.9.0'
+    compile 'com.ibm.mobilefirstplatform.clientsdk.android:analyticsapi:[1.0.0,)'
+    compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:3.1.0-SNAPSHOT@aar'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.robolectric:shadows-httpclient:3.0'
-    testCompile 'com.squareup.okhttp3:mockwebserver:3.6.0'
+    testCompile 'com.squareup.okhttp3:mockwebserver:3.9.0'
     testCompile 'org.json:json:20160810'
 }
 
