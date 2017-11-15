@@ -8,6 +8,12 @@
 
 ##Release Notes:
 
+###1.1.12
+- Updated okhttp version from 2.7.4 to 3.9.0 
+
+###1.1.11
+- Fixed Analytics to log RequestMethod in NetworkRequests data for a network access
+
 ###1.1.10
 - Fixed issue where Analytics log recording was not being enabled when initializing.
 
