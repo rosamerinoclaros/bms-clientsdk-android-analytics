@@ -13,10 +13,10 @@
 
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class NetworkLoggingInterceptor implements Interceptor{
-    @Override public com.squareup.okhttp.Response intercept(Interceptor.Chain chain) throws IOException {
+    @Override public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
         Request request = chain.request();
 
         long startTime = System.currentTimeMillis();
@@ -44,7 +44,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         Request requestWithHeaders = requestWithHeadersBuilder.build();
 
-        com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
+        okhttp3.Response response = chain.proceed(requestWithHeaders);
 
         if(BMSAnalytics.isRecordingNetworkEvents){
             JSONObject metadata = generateRoundTripRequestAnalyticsMetadata(request, startTime, trackingID, response);
@@ -63,7 +63,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
         long endTime = System.currentTimeMillis();
 
         try {
-            metadata.put("$path", request.urlString());
+            metadata.put("$path", request.url().toString());
             metadata.put(BMSAnalytics.CATEGORY, "network");
             metadata.put("$trackingid", trackingID);
             metadata.put("$outboundTimestamp", startTime);
