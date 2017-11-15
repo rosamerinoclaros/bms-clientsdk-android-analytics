@@ -23,9 +23,9 @@ import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +66,7 @@ public class MetadataHeaderInterceptor implements Interceptor {
                 .build();
 
 
-        com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
+        okhttp3.Response response = chain.proceed(requestWithHeaders);
 
         return response;
     }
