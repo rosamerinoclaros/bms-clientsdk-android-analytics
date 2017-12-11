@@ -23,17 +23,19 @@ import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+//import org.junit.runner.Request;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
+
+import okhttp3.Interceptor;
+import okhttp3.Response;
+
 
 public class MetadataHeaderInterceptor implements Interceptor {
     private static final String TAG = MetadataHeaderInterceptor.class.getName();
@@ -49,9 +51,9 @@ public class MetadataHeaderInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
+        okhttp3.Request request = chain.request();
 
-        Request requestWithHeaders;
+        okhttp3.Request requestWithHeaders;
 
         if(BMSAnalytics.getAppName() != null){
             try {
@@ -66,7 +68,7 @@ public class MetadataHeaderInterceptor implements Interceptor {
                 .build();
 
 
-        com.squareup.okhttp.Response response = chain.proceed(requestWithHeaders);
+        Response response = chain.proceed(requestWithHeaders);
 
         return response;
     }
