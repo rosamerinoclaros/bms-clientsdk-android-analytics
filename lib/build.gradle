@@ -23,12 +23,12 @@ ext {
 }
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -47,9 +47,11 @@ android {
 
 dependencies {
     compile 'com.ibm.mobilefirstplatform.clientsdk.android:core:[2.0.0,3.0.0)'
-
-    compile 'com.android.support:support-v4:+'
-
+    compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.okhttp3:okhttp-urlconnection:3.9.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.robolectric:shadows-httpclient:3.0'
@@ -59,7 +61,7 @@ task createPropertiesFile() {
     def prop = new Properties()
     def propFile = new File("${project.projectDir}/src/main/resources/sdk.properties");
 
-    if(propFile.getParentFile() != null && !propFile.getParentFile().exists()){
+    if (propFile.getParentFile() != null && !propFile.getParentFile().exists()) {
         propFile.getParentFile().mkdirs()
     }
 
@@ -165,8 +167,8 @@ uploadArchives {
                 authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
             }
 
-            pom.groupId='com.ibm.mobilefirstplatform.clientsdk.android'
-            pom.artifactId='analytics'
+            pom.groupId = 'com.ibm.mobilefirstplatform.clientsdk.android'
+            pom.artifactId = 'analytics'
             pom.version = getVersion()
 
             pom.project {
