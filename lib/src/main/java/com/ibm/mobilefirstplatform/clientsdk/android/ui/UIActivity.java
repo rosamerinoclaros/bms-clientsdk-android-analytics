@@ -4,20 +4,17 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.R;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static android.content.pm.PackageManager.GET_META_DATA;
-
 
 public class UIActivity extends AppCompatActivity {
 
@@ -48,7 +45,7 @@ public class UIActivity extends AppCompatActivity {
         ApplicationInfo ai = null;
         try {
             System.out.println("&&&&"+this.getPackageName()+" "+getApplication().getPackageName());
-            ai = getPackageManager().getApplicationInfo(this.getPackageName(),     PackageManager.GET_META_DATA);
+            ai = getPackageManager().getApplicationInfo(this.getPackageName(),   PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -88,8 +85,11 @@ public class UIActivity extends AppCompatActivity {
 
                launchMainActivity();
 
-
+                break;
             }
+            
+            default:    
+                
 
         }
     }
