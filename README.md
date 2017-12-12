@@ -2,12 +2,20 @@
 
 [![Build Status](https://travis-ci.org/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics.svg?branch=master)](https://travis-ci.org/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics)
 [![Build Status](https://travis-ci.org/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics.svg?branch=development)](https://travis-ci.org/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a7341d4023484dfeb09bf79d0db97484)](https://www.codacy.com/app/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ibm-bluemix-mobile-services/bms-clientsdk-android-analytics&amp;utm_campaign=Badge_Grade)
+[![Coverage Status](https://coveralls.io/repos/github/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics/badge.svg?branch=code-coverage)](https://coveralls.io/github/ibm-bluemix-mobile-services/bms-clientsdk-android-analytics?branch=code-coverage)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.ibm.mobilefirstplatform.clientsdk.android/analytics/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.ibm.mobilefirstplatform.clientsdk.android/analytics)
 
 ##Release Notes:
 
 ###1.2.0
 - Added location for log recording
+
+###1.1.12
+- Updated okhttp version from 2.7.4 to 3.9.0 
+
+###1.1.11
+- Fixed Analytics to log RequestMethod in NetworkRequests data for a network access
 
 ###1.1.10
 - Fixed issue where Analytics log recording was not being enabled when initializing.

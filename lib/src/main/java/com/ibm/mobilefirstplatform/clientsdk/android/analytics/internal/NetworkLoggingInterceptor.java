@@ -14,19 +14,22 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.UUID;
 
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class NetworkLoggingInterceptor implements Interceptor{
-    @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+
+    @Override public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
         Request request = chain.request();
 
         long startTime = System.currentTimeMillis();
@@ -45,7 +48,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
 
         Request requestWithHeaders = requestWithHeadersBuilder.build();
 
-        Response response = chain.proceed(requestWithHeaders);
+        okhttp3.Response response = chain.proceed(requestWithHeaders);
 
         if(BMSAnalytics.isRecordingNetworkEvents){
             JSONObject metadata = generateRoundTripRequestAnalyticsMetadata(request, startTime, trackingID, response);
@@ -72,6 +75,7 @@ public class NetworkLoggingInterceptor implements Interceptor{
             metadata.put("$roundTripTime", endTime - startTime);
 
             RequestBody body = request.body();
+            metadata.put("$requestMethod", request.method());
 
             if(body != null){
                 metadata.put("$bytesSent", body.contentLength());

@@ -23,6 +23,9 @@ import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,8 +36,6 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
 
-import okhttp3.Interceptor;
-import okhttp3.Response;
 
 
 public class MetadataHeaderInterceptor implements Interceptor {
@@ -68,7 +69,7 @@ public class MetadataHeaderInterceptor implements Interceptor {
                 .build();
 
 
-        Response response = chain.proceed(requestWithHeaders);
+        okhttp3.Response response = chain.proceed(requestWithHeaders);
 
         return response;
     }
