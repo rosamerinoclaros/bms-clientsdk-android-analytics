@@ -42,7 +42,6 @@ public class UIActivity extends AppCompatActivity {
     {
         ApplicationInfo ai = null;
         try {
-            System.out.println("&&&&"+this.getPackageName()+" "+getApplication().getPackageName());
             ai = getPackageManager().getApplicationInfo(this.getPackageName(),   PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -68,8 +67,7 @@ public class UIActivity extends AppCompatActivity {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
 
-                System.out.println("Inside Case");
-
+                
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
