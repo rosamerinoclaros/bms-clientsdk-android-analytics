@@ -29,11 +29,14 @@ import okhttp3.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+//import org.junit.runner.Request;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
+
+
 
 public class MetadataHeaderInterceptor implements Interceptor {
     private static final String TAG = MetadataHeaderInterceptor.class.getName();
@@ -49,9 +52,9 @@ public class MetadataHeaderInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
+        okhttp3.Request request = chain.request();
 
-        Request requestWithHeaders;
+        okhttp3.Request requestWithHeaders;
 
         if(BMSAnalytics.getAppName() != null){
             try {
