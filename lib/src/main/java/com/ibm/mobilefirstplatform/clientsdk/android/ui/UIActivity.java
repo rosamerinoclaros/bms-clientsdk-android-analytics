@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static android.content.pm.PackageManager.GET_META_DATA;
 
 public class UIActivity extends AppCompatActivity {
 
