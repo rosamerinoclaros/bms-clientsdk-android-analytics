@@ -10,13 +10,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -24,9 +21,6 @@ import com.google.android.gms.location.LocationServices;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 
 /**
@@ -40,8 +34,6 @@ public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionC
     private static MFPAnalyticsLocationListener instance = null;
 
     private static Context Context = null;
-
-    private static Activity Activity =null;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -59,8 +51,6 @@ public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionC
     private static int DISPLACEMENT = 10; // 10 meters
 
     private boolean initLocationRequests = false;
-
-    private static final int LOCATION_PERMISSION=11;
 
     public boolean GoogleApiClient_is_connected=false;
 
@@ -236,6 +226,7 @@ public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionC
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        //no op
     }
 
     @Override
