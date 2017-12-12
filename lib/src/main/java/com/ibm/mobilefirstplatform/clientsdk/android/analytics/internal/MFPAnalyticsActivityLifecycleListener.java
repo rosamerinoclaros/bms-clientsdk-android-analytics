@@ -14,7 +14,6 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.os.Handler;
-import android.support.annotation.RequiresPermission;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
