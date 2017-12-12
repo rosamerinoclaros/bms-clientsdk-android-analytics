@@ -10,15 +10,11 @@
  */
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
