@@ -10,11 +10,16 @@
  */
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -31,8 +36,8 @@ import java.util.UUID;
 
 /**
  * <p>
- * MFPAnalytics provides means of persistently capturing analytics data and provides a method call to send captured data to
  * the Analytics service.
+ * MFPAnalytics provides means of persistently capturing analytics data and provides a method call to send captured data to
  * </p>
  * <p>
  * Capture is on by default.
@@ -70,7 +75,7 @@ public class BMSAnalytics {
     protected static String appName = null;
     protected static boolean hasUserContext = false;
     public static boolean isRecordingNetworkEvents = false;
-    public static boolean collectLocation = false;
+    public static boolean collectLocation = true;
     public static MFPAnalyticsLocationListener locationService = null;
 
 
@@ -83,12 +88,11 @@ public class BMSAnalytics {
 
     public static final String APP_SESSION_ID_KEY = "$appSessionID";
     public static final String USER_ID_KEY = "$userID";
-    public static final String LOG_LOCATION_KEY = "loglocation";
+    public static final String LOG_LOCATION_KEY = "logLocation";
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
     public static final String INITIAL_CTX_CATEGORY = "initialCtx";
 
-	public static String overrideServerHost = null;
-
+    public static String overrideServerHost = null;
     /**
      * Initialize BMSAnalytics API.
      * This must be called before any other BMSAnalytics.* methods
@@ -101,6 +105,7 @@ public class BMSAnalytics {
      * @param contexts One or more context attributes MFPAnalytics will register event listeners for.
      */
     static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, boolean collectLocation, Analytics.DeviceEvent... contexts) {
+
         Context context = app.getApplicationContext();
         locationService = MFPAnalyticsLocationListener.getInstance(context);
 
@@ -135,16 +140,18 @@ public class BMSAnalytics {
             }
         }
 
-        if(!hasUserContext) {
-            //Use device ID as default user ID:
-            DEFAULT_USER_ID = getDeviceID(context);
-            setUserIdentity(DEFAULT_USER_ID, true);
-        }
+         //if (!hasUserContext) {
+             //Use device ID as default user ID:
+            //DEFAULT_USER_ID = getDeviceID(context);
+            //setUserIdentity(DEFAULT_USER_ID, true);
+        //}
 
-        if(collectLocation){
+	if (collectLocation) {
             BMSAnalytics.collectLocation = collectLocation;
             locationService.init();
         }
+
+        DEFAULT_USER_ID = getDeviceID(context);
 
 
         BMSAnalytics.hasUserContext = hasUserContext;
@@ -157,11 +164,16 @@ public class BMSAnalytics {
         enable();
     }
 
+    public static void setInitialUserIdentity()
+    {
+        Log.d("TAG","Setting Initial User Identity");
+        setUserIdentity(DEFAULT_USER_ID, true);
+    }
     /**
      * Initialize MFPAnalytics API.
      * This must be called before any other MFPAnalytics.* methods
      *
-     * @deprecated  As of release 1.1.0, replaced by {@link #init(Application, String, String, boolean, boolean, Analytics.DeviceEvent...)}}
+     * @deprecated As of release 1.1.0, replaced by {@link #init(Application, String, String, boolean, boolean, Analytics.DeviceEvent...)}}
      * please use the new init with user collection boolean. Using this method will
      * only collect anonymous users and throw exceptions when trying to set user identity
      *
@@ -185,14 +197,14 @@ public class BMSAnalytics {
     /**
      * Enable persistent capture of analytics data.  Enable, and thus capture, is the default.
      */
-    public static void enable () {
+    public static void enable(){
         LogPersister.setAnalyticsCapture(true);
     }
 
     /**
      * Disable persistent capture of analytics data.
      */
-    public static void disable () {
+    public static void disable(){
         LogPersister.setAnalyticsCapture(false);
     }
 
@@ -200,7 +212,7 @@ public class BMSAnalytics {
      * Determine if the capture of analytics events is enabled.
      * @return true if capture of analytics is enabled
      */
-    public static boolean isEnabled() {
+    public static boolean isEnabled(){
         return LogPersister.getAnalyticsCapture();
     }
 
@@ -210,9 +222,10 @@ public class BMSAnalytics {
      * (see {@link BMSAnalytics#enable()}) turned on.
      *
      */
-    public static void send () {
-        locationService.unregister();
+    public static void send(){
+        //locationService.unregister();
         LogPersister.sendAnalytics(null);
+
     }
 
     /**
@@ -229,7 +242,7 @@ public class BMSAnalytics {
      *
      * @param eventDescription An object that contains the description for the event
      */
-    public static void log (final JSONObject eventDescription) {
+    public static void log(final JSONObject eventDescription) {
         logger.analytics("", eventDescription);
     }
 
@@ -237,18 +250,24 @@ public class BMSAnalytics {
      * Log location event
      */
     public static void logLocation(){
-        if(!BMSAnalytics.collectLocation){
+        if (!BMSAnalytics.collectLocation) {
             logger.error("You must enable collectLocation before location can be logged");
             return;
         }
 
         // Create metadata object to log
         JSONObject metadata = new JSONObject();
+        String hashedUserID = UUID.nameUUIDFromBytes(DEFAULT_USER_ID.getBytes()).toString();
 
         try {
             metadata.put(CATEGORY, LOG_LOCATION_KEY);
+            metadata.put(LATITUDE_KEY,locationService.getLatitude());
+            metadata.put(LONGITUDE_KEY,locationService.getLongitude());
+            metadata.put(TIMESTAMP_KEY, (new Date()).getTime());
+            metadata.put(APP_SESSION_ID_KEY, MFPAnalyticsActivityLifecycleListener.getAppSessionID());
+            metadata.put(USER_ID_KEY,hashedUserID);
 
-        } catch(JSONException e){
+        } catch (JSONException e) {
             logger.debug("JSONException encountered logging change in user context: " + e.getMessage());
         }
 
@@ -263,17 +282,17 @@ public class BMSAnalytics {
      * @param user User User id for current app user.
      * @param isInitialCtx True if it's a user in the initial context (i.e. when app first starts)
      */
-    private static void setUserIdentity(final String user, boolean isInitialCtx){
-
+    private static void setUserIdentity(final String user, boolean isInitialCtx) {
         if (!isInitialCtx && !BMSAnalytics.hasUserContext) {
             // log it to file:
-            logger.error ("Cannot set user identity with anonymous user collection enabled.");
+            logger.error("Cannot set user identity with anonymous user collection enabled.");
             return;
         }
 
         // Create metadata object to log
         JSONObject metadata = new JSONObject();
 
+        DEFAULT_USER_ID=user;
         String hashedUserID = UUID.nameUUIDFromBytes(user.getBytes()).toString();
 
         try {
@@ -282,7 +301,7 @@ public class BMSAnalytics {
             } else {
                 metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
             }
-            if(BMSAnalytics.collectLocation && locationService.getInitLocationRequests()){
+            if (BMSAnalytics.collectLocation && locationService.getInitLocationRequests()) {
                 metadata.put(LONGITUDE_KEY, locationService.getLongitude());
                 metadata.put(LATITUDE_KEY, locationService.getLatitude());
             }
@@ -290,8 +309,7 @@ public class BMSAnalytics {
             metadata.put(TIMESTAMP_KEY, (new Date()).getTime());
             metadata.put(APP_SESSION_ID_KEY, MFPAnalyticsActivityLifecycleListener.getAppSessionID());
             metadata.put(USER_ID_KEY, hashedUserID);
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             logger.debug("JSONException encountered logging change in user context: " + e.getMessage());
         }
 
@@ -304,7 +322,7 @@ public class BMSAnalytics {
      *
      * @param user User User id for current app user.
      */
-    public static void setUserIdentity(final String user){
+    public static void setUserIdentity(final String user) {
         setUserIdentity(user, false);
     }
 
@@ -315,7 +333,7 @@ public class BMSAnalytics {
      * Does not do anything now
      */
     @Deprecated
-    public static void clearUserIdentity() {
+    public static void clearUserIdentity(){
         //used to set identity to default, but now, with anonymous, the user is always default, and with
         //named users, there is no default
     }
@@ -327,6 +345,8 @@ public class BMSAnalytics {
     public static String getAppName(){
         return appName;
     }
+
+
 
     /**
      * Implements the android life cycle callbacks to be registered with the application.
@@ -340,8 +360,8 @@ public class BMSAnalytics {
             if (instance == null) {
                 instance = new MFPActivityLifeCycleCallbackListener();
 
-		 app.registerActivityLifecycleCallbacks(instance);
-		 MFPAnalyticsActivityLifecycleListener.getInstance().onResume();
+                app.registerActivityLifecycleCallbacks(instance);
+                MFPAnalyticsActivityLifecycleListener.getInstance().onResume();
             }
         }
 

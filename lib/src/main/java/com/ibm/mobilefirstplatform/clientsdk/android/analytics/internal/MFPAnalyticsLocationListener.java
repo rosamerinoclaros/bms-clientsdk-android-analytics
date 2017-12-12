@@ -1,198 +1,245 @@
-/*
- *     Copyright 2015 IBM Corp.
- *     Licensed under the Apache License, Version 2.0 (the "License");
- *     you may not use this file except in compliance with the License.
- *     You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- *     Unless required by applicable law or agreed to in writing, software
- *     distributed under the License is distributed on an "AS IS" BASIS,
- *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *     See the License for the specific language governing permissions and
- *     limitations under the License.
- */
-
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
-import android.support.annotation.RequiresPermission;
 
-public class MFPAnalyticsLocationListener implements LocationListener {
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
+
+/**
+ * Created by krishnendu on 08/11/17.
+ */
+
+public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     protected static Logger logger = Logger.getLogger(LogPersister.INTERNAL_PREFIX + MFPAnalyticsLocationListener.class.getSimpleName());
+
     private static MFPAnalyticsLocationListener instance = null;
-
-    private String REQUEST_LOG = "Request location updates for ";
-
-    private int TIME_DELAY = 1000 * 60 * 2; //2 min
-
-    private boolean initLocationRequests = false;
 
     private static Context Context = null;
 
-    private static LocationManager manager = null;
-    private Location bestLocation = null;
+    private static Activity Activity =null;
 
-    private Location oldLocation = null;
+    private GoogleApiClient mGoogleApiClient;
 
-    public static MFPAnalyticsLocationListener getInstance(Context context){
-        if(instance == null) {
+    private LocationRequest mLocationRequest;
+
+
+    private Location mLastLocation ;
+
+    private double Latitude = 0.0;
+
+    private double Longitude = 0.0;
+
+    private static int UPDATE_INTERVAL = 10000; // 10 sec
+    private static int FASTEST_INTERVAL = 5000; // 5 sec
+    private static int DISPLACEMENT = 10; // 10 meters
+
+    private boolean initLocationRequests = false;
+
+    private static final int LOCATION_PERMISSION=11;
+
+    public boolean GoogleApiClient_is_connected=false;
+
+    public static MFPAnalyticsLocationListener getInstance(Context context) {
+
+        Context = context;
+   
+        if (instance == null) {
             instance = new MFPAnalyticsLocationListener();
-            Context = context;
-            manager = (LocationManager)context.getSystemService(context.LOCATION_SERVICE);
         }
-
-
-
+      
         return instance;
     }
 
-    public void init(){
-        if(isNetworkEnabled() && checkPermission()) {
-            initLocationRequests = true;
-            logger.info(REQUEST_LOG + "network provider");
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, instance);
-        } else if(isGPSEnabled() && checkPermission()){
-            initLocationRequests = true;
-            logger.info(REQUEST_LOG + "GPS provider");
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0 , instance);
-        } else {
-            logger.error("Check to see if your location permissions have been enabled.");
+    public void init() {
+ 
+        try {
+            if (checkPlayServices()) {
+
+                // Building the GoogleApi client
+                buildGoogleApiClient();
+
+                createLocationRequest();
+
+                initLocationRequests = true;
+
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
 
     }
 
-    public static void unregister(){
-        if(checkPermission() && instance != null){
-            manager.removeUpdates(instance);
-        } else {
-            logger.error("Check to see if your location permissions have been enabled.");
-        }
-    }
 
+    private boolean checkPlayServices() {
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if(oldLocation == null){
-            oldLocation = location;
-        } else {
-            if(isBetterLocation(oldLocation, location)){
-                bestLocation = location;
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int resultCode = googleAPI.isGooglePlayServicesAvailable(Context);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleAPI.isUserResolvableError(resultCode)) {
+                Toast.makeText(Context,
+                        "This device is supported. Please download google play services", Toast.LENGTH_LONG)
+                        .show();
             } else {
-                bestLocation = oldLocation;
+                Toast.makeText(Context,
+                        "This device is not supported.", Toast.LENGTH_LONG)
+                        .show();
+                return true;
             }
-        }
-
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
-
-
-    public boolean isNetworkEnabled() {
-        return manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    public boolean isGPSEnabled() {
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-
-    public double getLatitude(){
-        if(checkPermission() && bestLocation == null && initLocationRequests){
-            if(isGPSEnabled()){
-                return manager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
-            } else if(isNetworkEnabled()){
-                return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude();
-            }
-        } else if(!checkPermission() || !initLocationRequests){
-            logger.error("Check to see if your location permissions have been enabled.");
-        }
-
-        return bestLocation.getLatitude();
-    }
-
-    public double getLongitude() throws SecurityException{
-        if(checkPermission() && bestLocation == null && initLocationRequests){
-            if(isGPSEnabled()){
-                return manager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
-            } else if (isNetworkEnabled()) {
-                return manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude();
-            }
-        } else if(!checkPermission() && bestLocation == null){
-            logger.error("Check to see if your location permissions have been enabled.");
-        }
-
-        return bestLocation.getLongitude();
-    }
-
-    private boolean isBetterLocation(Location oldLocation, Location newLocation){
-        if(oldLocation == null){
-            return true;
-        }
-
-        // Check if the new location is newer than old location
-        long delta = newLocation.getTime() - oldLocation.getTime();
-        boolean isReallyNew = delta > TIME_DELAY;
-        boolean isReallyOld = delta < -TIME_DELAY;
-        boolean isNew = delta > 0;
-
-        // If it greater than TIME_DELAY than the user must have moved and vice versa
-        if(isReallyNew){
-            return true;
-        } else if (isReallyOld){
             return false;
         }
+        return true;
+    }
 
-        //Check accuracy (the higher the number the lower the accuracy)
-        int accuracy = (int) (newLocation.getAccuracy() - oldLocation.getAccuracy());
-        boolean isLessAccurate = accuracy > 0;
-        boolean isMoreAccurate = accuracy < 0;
-        boolean isVeryInaccurate = accuracy > 200;
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+    }
 
-        if(isMoreAccurate){
-            return true;
-        } else if (isNew && !isLessAccurate){
-            return true;
-        } else if(isNew && !isVeryInaccurate){
-            return true;
+    protected  void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(Context)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+
+        mGoogleApiClient.connect();
+
+
+
+    }
+
+    public double getLatitude() {
+       
+        if (!checkPermission() || !initLocationRequests) {
+            logger.error("Check to see if your location permissions have been enabled.");
+        }
+        if (mLastLocation != null) {
+            Latitude = mLastLocation.getLatitude();
         }
 
-        return false;
+        return Latitude;
+    }
+
+
+    public double getLongitude() throws SecurityException {
+        if (!checkPermission() || !initLocationRequests) {
+            logger.error("Check to see if your location permissions have been enabled.");
+        }
+
+        if (mLastLocation != null) {
+            Longitude = mLastLocation.getLongitude();
+        }
+        return Longitude;
     }
 
     private static boolean checkPermission() {
+ 
         return !(Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(Context, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_FINE_LOCATION) !=
                         PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_COARSE_LOCATION) !=
                         PackageManager.PERMISSION_GRANTED);
     }
 
-    public boolean getInitLocationRequests(){
+    public boolean getInitLocationRequests() {
         return initLocationRequests;
     }
-}
 
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        GoogleApiClient_is_connected=true;
+
+        updateLocation();
+
+        BMSAnalytics.setInitialUserIdentity();
+
+            startLocationUpdates();
+
+    }
+
+
+    protected void updateLocation() {
+ 
+        if (ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+
+         //   ActivityCompat.requestPermissions(mParentActivity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_ACCESS_FINE_LOCATION);
+         //   Log.d("TAG", "Permission Was Requested" );
+            return;
+        }
+ 
+        mLastLocation = LocationServices.FusedLocationApi
+                .getLastLocation(mGoogleApiClient);
+
+    }
+    /**
+     * Starting the location updates
+     * */
+    protected void startLocationUpdates() {
+ 
+        if (ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+    }
+}
