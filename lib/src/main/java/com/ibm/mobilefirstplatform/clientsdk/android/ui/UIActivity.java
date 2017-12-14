@@ -1,11 +1,11 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.ui;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -14,7 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class UIActivity extends AppCompatActivity {
+
+public class UIActivity extends Activity {
 
 
     private final int MY_PERMISSIONS_REQUEST_LOCATION=11;
@@ -42,14 +43,13 @@ public class UIActivity extends AppCompatActivity {
     {
         ApplicationInfo ai = null;
         try {
-            ai = getPackageManager().getApplicationInfo(this.getPackageName(),   PackageManager.GET_META_DATA);
+            ai = getPackageManager().getApplicationInfo(this.getPackageName(),     PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
         Bundle bundle = ai.metaData;
         String mainActivity = bundle.getString("main_activity");
 
-        System.out.println("mainActivity "+mainActivity);
         Intent launchMain = null;
         try {
             launchMain = new Intent(this, Class.forName(mainActivity));
@@ -67,7 +67,8 @@ public class UIActivity extends AppCompatActivity {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
 
-                
+                System.out.println("Inside Case");
+
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -79,13 +80,10 @@ public class UIActivity extends AppCompatActivity {
                     Toast.makeText(this,"Location Logging APi is deactivated ",Toast.LENGTH_LONG);
                 }
 
-               launchMainActivity();
+                launchMainActivity();
 
-                break;
+
             }
-            
-            default:    
-                
 
         }
     }
