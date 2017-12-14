@@ -82,8 +82,11 @@ public class UIActivity extends Activity {
 
                 launchMainActivity();
 
-
-            }
+                 break;
+               }
+             
+            default:    
+            
 
         }
     }
