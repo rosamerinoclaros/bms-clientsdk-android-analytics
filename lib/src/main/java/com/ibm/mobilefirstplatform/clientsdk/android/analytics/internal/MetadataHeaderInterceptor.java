@@ -24,12 +24,10 @@ import android.util.Log;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 import okhttp3.Interceptor;
-import okhttp3.Request;
 import okhttp3.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-//import org.junit.runner.Request;
 
 import java.io.IOException;
 import java.io.InputStream;
