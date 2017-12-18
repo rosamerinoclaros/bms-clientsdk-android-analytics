@@ -42,7 +42,7 @@ task jacocoTestReport(type: JacocoCustomResport) {
                        '**/BuildConfig.*',
                        '**/Manifest*.*'
                        '**/MFPAnalyticsLocationListener.class'
-                       '**/UIactivity.class'
+                       '**/UIActivity.class'
             ]
     )
 
