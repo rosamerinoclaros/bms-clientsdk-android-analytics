@@ -1,7 +1,6 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal;
 
 
-import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 
 import org.json.JSONException;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public class BMSAnalyticsTest {
         BMSAnalytics.logLocation();
 
 
-        assertTrue(true);
+   //     assertTrue(true);
 
 
 
