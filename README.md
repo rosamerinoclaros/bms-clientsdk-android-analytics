@@ -8,7 +8,7 @@
 
 ##Release Notes:
 
-###1.2.1
+###1.2.2
 - Added location for log recording
 
 ###1.1.12
