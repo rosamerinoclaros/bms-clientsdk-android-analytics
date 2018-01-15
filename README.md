@@ -8,8 +8,34 @@
 
 ##Release Notes:
 
-###1.2.1
+###1.2.+
 - Added location for log recording
+
+To properly enable the location service some configuratios are required in the AndroidManifest.xml.
+
+Open the `AndroidManifest.xml` file for your Android project. You can find this file in **app > manifests**. Add internet access and location access permission under the `<manifest>` element:
+
+	```
+	 <uses-permission android:name="android.permission.INTERNET" />
+	 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+	```
+   If you're using sdk version greater than >= 1.2  then you need to put this below part inside the `application` of the `AndroidManifest.xml` file.
+   	```
+	 <activity
+            android:name="com.ibm.mobilefirstplatform.clientsdk.android.ui.UIActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+	
+	```
+   
+   {: codeblock}
+   
 
 ###1.1.12
 - Updated okhttp version from 2.7.4 to 3.9.0 
