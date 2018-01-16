@@ -15,7 +15,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
+
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -103,7 +103,7 @@ public class BMSAnalytics {
     static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, boolean collectLocation, Analytics.DeviceEvent... contexts) {
 
         Context context = app.getApplicationContext();
-       
+
         //Initialize LogPersister
         LogPersister.setLogLevel(Logger.getLogLevel());
         LogPersister.setContext(context);
