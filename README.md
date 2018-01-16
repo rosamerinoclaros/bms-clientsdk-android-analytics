@@ -9,6 +9,7 @@
 ## Release Notes:
 
 ### 1.2.+
+
 - Added location for log recording
 
 To properly enable the location service some configuratios are required in the AndroidManifest.xml.
