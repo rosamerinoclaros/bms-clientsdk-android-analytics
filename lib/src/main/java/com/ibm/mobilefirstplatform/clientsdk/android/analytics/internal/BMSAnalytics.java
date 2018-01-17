@@ -135,11 +135,11 @@ public class BMSAnalytics {
             }
         }
 
-         if (!hasUserContext) {
+         //if (!hasUserContext) {
          //    Use device ID as default user ID:
             DEFAULT_USER_ID = getDeviceID(context);
             setUserIdentity(DEFAULT_USER_ID, true);
-         }
+         //}
 
 	    if (collectLocation) {
             locationService = MFPAnalyticsLocationListener.getInstance(context);
