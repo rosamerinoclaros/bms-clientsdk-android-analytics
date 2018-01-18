@@ -291,9 +291,11 @@ public class BMSAnalytics {
             } else {
                 metadata.put(CATEGORY, USER_SWITCH_CATEGORY);
             }
-            if (BMSAnalytics.collectLocation && locationService.getInitLocationRequests()) {
-                metadata.put(LONGITUDE_KEY, locationService.getLongitude());
-                metadata.put(LATITUDE_KEY, locationService.getLatitude());
+            if (BMSAnalytics.collectLocation  ) {
+                if(locationService.getInitLocationRequests() ){
+                    metadata.put(LONGITUDE_KEY, locationService.getLongitude());
+                    metadata.put(LATITUDE_KEY, locationService.getLatitude());
+                }
             }
 
             metadata.put(TIMESTAMP_KEY, (new Date()).getTime());
