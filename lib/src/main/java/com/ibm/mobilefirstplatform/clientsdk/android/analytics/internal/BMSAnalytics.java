@@ -103,9 +103,7 @@ public class BMSAnalytics {
     static public void init(Application app, String applicationName, String clientApiKey, boolean hasUserContext, boolean collectLocation, Analytics.DeviceEvent... contexts) {
 
         Context context = app.getApplicationContext();
-        if (collectLocation) {
-            locationService = MFPAnalyticsLocationListener.getInstance(context);
-        }
+
         //Initialize LogPersister
         LogPersister.setLogLevel(Logger.getLogLevel());
         LogPersister.setContext(context);
@@ -144,6 +142,7 @@ public class BMSAnalytics {
          //}
 
 	    if (collectLocation) {
+            locationService = MFPAnalyticsLocationListener.getInstance(context);
             BMSAnalytics.collectLocation = collectLocation;
             locationService.init();
         }
