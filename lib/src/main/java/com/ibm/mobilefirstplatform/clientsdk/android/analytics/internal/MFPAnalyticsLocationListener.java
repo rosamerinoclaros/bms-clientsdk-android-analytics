@@ -87,8 +87,17 @@ public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionC
 
 
     private boolean checkPlayServices() {
-
-        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        GoogleApiAvailability googleAPI = null;
+        try {
+            googleAPI = GoogleApiAvailability.getInstance();
+        }catch(NoClassDefFoundError e){
+            logger.error("location service api dependency not provided  , provide this following gradle dependency in build.gradle (app) file :compile 'com.google.android.gms:play-services-location:10.0.1' ( follow docs https://console.bluemix.net/docs/services/mobileanalytics/install-client-sdk.html#mobileanalytics_sdk )");
+            Toast.makeText(Context,
+                    "location service api dependency not provided", Toast.LENGTH_LONG)
+                    .show();
+            return false;
+            
+        }
         int resultCode = googleAPI.isGooglePlayServicesAvailable(Context);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (googleAPI.isUserResolvableError(resultCode)) {
@@ -169,6 +178,8 @@ public class MFPAnalyticsLocationListener implements GoogleApiClient.ConnectionC
         GoogleApiClient_is_connected=true;
 
         updateLocation();
+
+        BMSAnalytics.setInitialUserIdentity();
 
         startLocationUpdates();
 
