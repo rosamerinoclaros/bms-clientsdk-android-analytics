@@ -8,6 +8,19 @@
 
 ## Release Notes:
 
+### 1.3.+
+
+- Added In App Feedback
+To properly enable In App FeedBack some configurations are required in the AndroidManifest.xml.
+
+   Add following 2 activity into AndroidManifest.xml.
+   ```
+		 <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback.EditorPopup"/>
+
+		 <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback.ReviewPopup"/>
+
+   ```
+
 ### 1.2.+
 
 - Added location for log recording
@@ -22,7 +35,7 @@ Open the `AndroidManifest.xml` file for your Android project. You can find this 
 	 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 	```
    If you're using sdk version greater than >= 1.2  then you need to put this below part inside the `application` of the `AndroidManifest.xml` file.
- 
+
  	```
 	 <activity
             android:name="com.ibm.mobilefirstplatform.clientsdk.android.ui.UIActivity"
@@ -33,14 +46,14 @@ Open the `AndroidManifest.xml` file for your Android project. You can find this 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-	
+
 	```
-   
+
    {: codeblock}
-   
+
 
 ### 1.1.12
-- Updated okhttp version from 2.7.4 to 3.9.0 
+- Updated okhttp version from 2.7.4 to 3.9.0
 
 ### 1.1.11
 - Fixed Analytics to log RequestMethod in NetworkRequests data for a network access

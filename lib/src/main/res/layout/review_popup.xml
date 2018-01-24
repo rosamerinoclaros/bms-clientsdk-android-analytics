@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/reviewpopup"
+    android:background="#DAE5F1"
+     >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="70sp"
+        android:background="#FF5C02"
+        android:layout_centerHorizontal="true"
+        android:padding="20dp"
+        android:text="Review your feedback"
+        android:textSize="18dp"
+        android:textColor="#FFFFFF"
+        android:typeface="serif"
+        />
+
+    <!-- <Button android:layout_alignParentRight="true" android:text="X"
+        android:textColor="#000000" android:background="@drawable/round_button_background"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_margin="10dp" android:layout_height="25dp"
+        android:layout_width="25dp" android:textSize="14sp" android:textStyle="bold"
+        android:onClick="closeActivity" /> -->
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="450sp"
+        android:orientation="vertical"
+        android:layout_below="@+id/title"
+        android:fillViewport="false">
+
+        <LinearLayout
+            android:id="@+id/relative_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_below="@+id/title">
+        </LinearLayout>
+    </ScrollView>
+
+    <HorizontalScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="match_parent"
+        android:layout_height="80sp"
+        android:orientation="horizontal"
+        android:layout_below="@+id/scrollView"
+        android:scrollbars="horizontal"
+        android:fadeScrollbars="false"
+        android:fillViewport="false"
+        android:background="#f1eef1"
+        >
+        <LinearLayout
+            android:id="@+id/image_button_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            >
+            <View
+                android:layout_width="5dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SEND"
+        android:background="#47525E"
+        android:textColor="#FFFFFF"
+        android:layout_below="@+id/scrollView2"
+        android:layout_alignParentRight="true"
+        />
+</RelativeLayout>
