@@ -126,6 +126,7 @@ public final class LogPersister {
     static public final Object WAIT_LOCK = new Object();
 
     private static final String LOG_UPLOADER_PATH = "/analytics-service/rest/data/events/clientlogs/";
+    private static final String FEEDBACK_UPLOADER_PATH = "/analytics-service/rest/data/events/clientfeedback/";
     private static final String LOG_UPLOADER_APP_ROUTE = "mobile-analytics-dashboard";
 
     // for internal logging to android.util.Log only, not our log collection
@@ -1031,7 +1032,7 @@ public final class LogPersister {
         feedbackUploaderURL = appRoute + FEEDBACK_UPLOADER_PATH;
 
         System.out.println("feedbackUploaderURL: "+feedbackUploaderURL);
-        LogPersister1.SendLogsRequestListener requestListener = new LogPersister1.SendLogsRequestListener(fileToSend, listener, false, feedbackUploaderURL);
+        LogPersister.SendLogsRequestListener requestListener = new LogPersister.SendLogsRequestListener(fileToSend, listener, false, feedbackUploaderURL);
 
         Request sendLogsRequest = new Request(feedbackUploaderURL, Request.POST);
 
@@ -1046,7 +1047,7 @@ public final class LogPersister {
             return;
         }
 
-        ProgressListener progressListner = new LogPersister1.SendFeedBackProgressListner(fileToSend.length());
+        ProgressListener progressListner = new LogPersister.SendFeedBackProgressListner(fileToSend.length());
 
         sendLogsRequest.upload(null, fileToSend, progressListner, requestListener);
     }
