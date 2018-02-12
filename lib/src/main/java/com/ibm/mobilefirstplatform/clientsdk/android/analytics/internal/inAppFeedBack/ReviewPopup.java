@@ -1,10 +1,12 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inaAppFeedBack;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
+import android.icu.util.Freezable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -14,9 +16,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ibm.mobilefirstplatform.clientsdk.android.R;
+
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,6 +30,9 @@ import java.util.List;
 
 public class ReviewPopup extends Activity {
     //private ImageView imageView;
+
+    List<String> fileList = null;
+    static FrameLayout currentEnabledButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,28 +48,44 @@ public class ReviewPopup extends Activity {
         getWindow().setLayout(width,height);
 
         Bundle extras = getIntent().getExtras();
-        String fileNameFromIntentBundle = extras.getString("imagename");
+        String fileNameFromIntentBundle = null;
+        if(extras != null){
+            fileNameFromIntentBundle = extras.getString("imagename");
+        }
 
         int sp20 = (int)Utility.spToPixels(this,20);
         int sp50 = (int)Utility.spToPixels(this,50);
         int sp60 = (int)Utility.spToPixels(this,60);
         int dp2 = (int)Utility.dipToPixels(this, 2);
-        int dp5 = (int)Utility.dipToPixels(this, 10);
-        int dp10 = (int)Utility.dipToPixels(this, 5);
+        int dp10 = (int)Utility.dipToPixels(this, 10);
+        int dp5 = (int)Utility.dipToPixels(this, 5);
 
         final LinearLayout imageButtonlayout = (LinearLayout)findViewById(R.id.image_button_view);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sp60,sp60);
         params.setMargins(0,0,dp10,0);
         //params.setMargins(dp5,dp5,dp5,dp5);
 
-        String defaultFile = "";
-        for(final String filename : Utility.getImageFileList("temp")){
+        //fileList = Utility.getImageFileList();
+        fileList = Utility.getCurrentImageSetForReview();
+
+        //if(fileList.size()==0){
+        //    finish();
+        //}
+
+        boolean isImageViewSet = false;
+
+        final HashMap<String, Object> frameLayoutMap = new HashMap<>();
+        currentEnabledButton = null;
+
+        for(final String filename : fileList){
 
             final FrameLayout frameLayout = new FrameLayout(this);
             frameLayout.setLayoutParams(params);
+            frameLayout.setBackgroundColor(Color.parseColor("#E8EAF6"));
 
             FrameLayout.LayoutParams param1 = new FrameLayout.LayoutParams(sp20,sp20);
             params.setMargins(0,0,dp5,0);
+
 
             //Close button at the top left cornor of the iconised screenshot button
             final Button closebutton = new Button(this);
@@ -78,6 +102,19 @@ public class ReviewPopup extends Activity {
                 public void onClick(View v) {
                     Utility.discardFeedbackFiles(filename);
                     imageButtonlayout.removeView(frameLayout);
+                    fileList = Utility.removeItemFromList(fileList, filename);
+
+                    //Remove the current view and show first image in the imageView
+                    if(fileList.size()>0){
+                        String filename = fileList.get(0);
+                        FrameLayout currentFrameLayout = (FrameLayout)frameLayoutMap.get(filename);
+                        currentFrameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
+                        showEditedImageWithComment(filename);
+                        currentEnabledButton = currentFrameLayout;
+                    }else{
+                        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.relative_view);
+                        linearLayout.removeAllViews();
+                    }
                 }
             });
 
@@ -92,20 +129,44 @@ public class ReviewPopup extends Activity {
 
             frameLayout.addView(closebutton);
             imageButtonlayout.addView(frameLayout);
+            frameLayoutMap.put(filename, frameLayout);
 
-            defaultFile=filename;
             imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if(currentEnabledButton!=null){
+                        currentEnabledButton.setBackgroundColor(Color.parseColor("#E8EAF6"));
+                    }
+                    frameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
+                    currentEnabledButton = frameLayout;
                     showEditedImageWithComment(filename);
                 }
             });
+
+            if(filename.equals(fileNameFromIntentBundle)){
+                if(currentEnabledButton!=null){
+                    currentEnabledButton.setBackgroundColor(Color.parseColor("#E8EAF6"));
+                }
+                frameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
+                currentEnabledButton = frameLayout;
+                showEditedImageWithComment(filename);
+                isImageViewSet = true;
+            }
         }
 
-        if(fileNameFromIntentBundle != "") {
-            showEditedImageWithComment(fileNameFromIntentBundle);
-        }else {
-            showEditedImageWithComment(defaultFile);
+        if(!isImageViewSet){
+            int size = fileList.size();
+            if(size>0){
+                String filename = fileList.get(size-1);
+                if(currentEnabledButton!=null){
+                    currentEnabledButton.setBackgroundColor(Color.parseColor("#E8EAF6"));
+                }
+
+                FrameLayout currentFrameLayout = (FrameLayout)frameLayoutMap.get(filename);
+                currentFrameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
+                showEditedImageWithComment(filename);
+                currentEnabledButton = currentFrameLayout;
+            }
         }
 
         //Plus Button
@@ -131,7 +192,8 @@ public class ReviewPopup extends Activity {
         submitButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Utility.deleteAllFiles();
+
+                //Utility.deleteAllFiles();
                 new SubmitAppFeedBack(ReviewPopup.this).show();
             }
         });
@@ -140,6 +202,7 @@ public class ReviewPopup extends Activity {
     private void showEditedImageWithComment(String filename){
         LinearLayout linearLayout = (LinearLayout)findViewById(R.id.relative_view);
         linearLayout.removeAllViews();
+
 
         ImageView imageView = new ImageView(this);
         imageView.setTag(filename);
@@ -151,11 +214,17 @@ public class ReviewPopup extends Activity {
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Utility.loadImageFromLocalStore(this, filename, imageView);
 
+        //for (int i=0; i < 2; i++){
+            Toast toast = Toast.makeText(this, "Scroll Down To View the Comments", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP|Gravity.CENTER, 3, 10);
+            toast.show();
+        //}
+
         linearLayout.addView(imageView);
         linearLayout.addView(drawLine());
 
         int i=0;
-        for (String comment : Utility.fetchCommentsFromFile(Utility.fetchCommentfileName(filename))) {
+        for (String comment : Utility.fetchCommentsFromJSONFile(Utility.fetchJSONfileName(filename))) {
             i++;
             System.out.println("value= " + comment);
 

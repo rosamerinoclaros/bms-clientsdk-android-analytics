@@ -18,6 +18,7 @@ import android.provider.Settings;
 
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.MFPInAppFeedBackListner;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.internal.BaseRequest;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
@@ -111,6 +112,8 @@ public class BMSAnalytics {
         //Instrument Logger with LogPersisterDelegate
         LogPersisterDelegate logPersisterDelegate = new LogPersisterDelegate();
         Logger.setLogPersister(logPersisterDelegate);
+
+        MFPInAppFeedBackListner.setContext(context);
 
         Analytics.setAnalyticsDelegate(new BMSAnalyticsDelegate());
 
@@ -335,7 +338,9 @@ public class BMSAnalytics {
         return appName;
     }
 
-
+    public static void triggerFeedbackMode(Activity activity){
+        MFPInAppFeedBackListner.triggerFeedbackMode(activity);
+    }
 
     /**
      * Implements the android life cycle callbacks to be registered with the application.

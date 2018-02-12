@@ -1,4 +1,4 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.graphics.Bitmap;
 import android.view.View;

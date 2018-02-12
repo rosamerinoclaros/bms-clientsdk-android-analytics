@@ -1,12 +1,8 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.widget.Toast;
 
 
 /**

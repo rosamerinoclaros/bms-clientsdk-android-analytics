@@ -1,16 +1,13 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -25,6 +22,10 @@ import android.widget.TextView;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,26 +38,27 @@ public class EditorPopup extends Activity{
     private ImageButton drawButton;
     private ImageButton eraseButton;
     private ImageButton commentButton;
+    private Button reviewButton;
     private EditText editText;
     private TextView commentTextLable;
     private View editGroup;
-    private static String filename;
 
-    Bitmap bitmapMaster;
-    Canvas canvasMaster;
+    private Bitmap bitmapMaster;
+    private Canvas canvasMaster;
 
-    int prvX, prvY;
-    Paint paintDraw;
-    Paint paintBlur;
-    private static boolean drawToggle=false;
-    private static boolean eraseToggle=false;
-    private static boolean commentToggle=false;
-    private static boolean allowComment;
-    private static boolean fileSaved;
-    private static int count;
+    private int prvX, prvY;
+    private Paint paintDraw;
+    private Paint paintBlur;
 
-    public static List<String> commentList;
-    private static boolean isEdited = false;
+    private boolean drawToggle;
+    private boolean eraseToggle;
+    private boolean commentToggle;
+    private boolean allowComment;
+    private boolean fileSaved;
+    private int count;
+    private String filename;
+    private List<String> commentList;
+    private boolean isEdited;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +67,13 @@ public class EditorPopup extends Activity{
 
         count = 0;
         commentList = new ArrayList<>();
-        allowComment=true;
         isEdited = false;
         fileSaved = false;
+
+        drawToggle=false;
+        eraseToggle=false;
+        commentToggle=false;
+        allowComment=true;
 
         imageView = (ImageView) findViewById(R.id.imageView);
         drawButton = (ImageButton) findViewById(R.id.drawButton);
@@ -123,7 +129,9 @@ public class EditorPopup extends Activity{
             }
         });
 
-        Button reviewButton= (Button) findViewById(R.id.reviewButton);
+        reviewButton = (Button) findViewById(R.id.reviewButton);
+        //reviewButton.setEnabled(false);
+        //reviewButton.setBackgroundColor(Color.parseColor("#E0E0E0"));
         reviewButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -132,12 +140,8 @@ public class EditorPopup extends Activity{
                     saveImageAndComment();
                 }else{
                     Utility.discardFeedbackFiles(filename);
-                    filename = "";
                 }
-                //new DismissAppFeedBack(this, filename, isEdited, "review").show();
-                Intent intent = new Intent(EditorPopup.this, ReviewPopup.class);
-                intent.putExtra("imagename", filename);
-                startActivityForResult(intent, 200);
+                new ReviewButtonAction(EditorPopup.this, filename, isEdited).show();
             }
         });
 
@@ -228,11 +232,52 @@ public class EditorPopup extends Activity{
     private void saveImageAndComment(){
         if(!fileSaved){
             Utility.saveIamgeToLocalStore(bitmapMaster, filename);
-            int i = 0;
+
+            //ScreenFeedback.json
+            JSONObject screenFeedBackJSON = new JSONObject();
+
+            String screenName = Utility.getScreenName(filename);
+            String deviceID = Utility.getDeviceID(MFPInAppFeedBackListner.getContext());
+            String timeCreated  = Utility.getTimeCreated(filename);
+            String id = deviceID+ "_" + screenName +"_" + timeCreated;
+            String jsonFileName = Utility.fetchJSONfileName(filename);
+
+            JSONArray commentJSON = new JSONArray();
             for(String comment: commentList){
-                Utility.appendToFile(Utility.fetchCommentfileName(filename), "comment"+i+"="+comment);
-                i++;
+                commentJSON.put(comment);
             }
+
+            try {
+                screenFeedBackJSON.put("id", id);
+                //screenFeedBackJSON.put("timeSent", null);
+                screenFeedBackJSON.put("comments", commentJSON);
+                screenFeedBackJSON.put("image", filename);
+            } catch (JSONException e) {
+                //No chance of getting here
+            }
+
+
+            //AppFeedBackSummary.json
+            JSONObject appFeedBacksummaryJSON = new JSONObject();
+            try{
+                String afbs = Utility.convertFileToString("AppFeedBackSummary.json");
+                if(!afbs.equals("")){
+                    appFeedBacksummaryJSON = new JSONObject(afbs);
+                    JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
+                    savedArray.put(filename);
+                }else{
+                    //create new instance
+                    appFeedBacksummaryJSON.put("saved", new JSONArray().put(filename));
+                    appFeedBacksummaryJSON.put("send", new JSONObject());
+                }
+            }catch (JSONException je){
+                //
+            }
+
+            System.out.println(jsonFileName +":"+ screenFeedBackJSON.toString());
+            System.out.println("AppFeedBackSummary.json:" + appFeedBacksummaryJSON.toString());
+            Utility.addDataToFile(jsonFileName, screenFeedBackJSON.toString(), false);
+            Utility.addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(), false);
             fileSaved=true;
         }
     }
@@ -274,6 +319,8 @@ public class EditorPopup extends Activity{
                         ((eraseToggle)? paintBlur: paintDraw));
             }
             imageView.invalidate();
+            //reviewButton.setEnabled(true);
+            //reviewButton.setBackgroundColor(Color.parseColor("#47525E"));
         }
     }
 
@@ -289,29 +336,6 @@ public class EditorPopup extends Activity{
             saveImageAndComment();
         }
         new DismissAppFeedBack(this, filename, isEdited).show();
-    }
-
-    // Storage Permissions variables
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
-    //persmission method.
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have read or write permission
-        int writePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int readPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
-
-        if (writePermission != PackageManager.PERMISSION_GRANTED || readPermission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
     }
 
     @Override

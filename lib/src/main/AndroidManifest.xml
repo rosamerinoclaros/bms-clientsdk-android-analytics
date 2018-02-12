@@ -11,9 +11,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
 
-        <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback.EditorPopup"></activity>
+        <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.EditorPopup"></activity>
 
-        <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback.ReviewPopup"></activity>
+        <activity android:name="com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.ReviewPopup"></activity>
 
     </application>
 

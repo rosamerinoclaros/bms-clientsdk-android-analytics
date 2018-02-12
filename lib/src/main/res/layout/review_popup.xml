@@ -51,9 +51,6 @@
         android:layout_height="80sp"
         android:orientation="horizontal"
         android:layout_below="@+id/scrollView"
-        android:scrollbars="horizontal"
-        android:fadeScrollbars="false"
-        android:fillViewport="false"
         android:background="#f1eef1"
         >
         <LinearLayout

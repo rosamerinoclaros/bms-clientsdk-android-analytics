@@ -22,6 +22,7 @@ import android.util.Log;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.BMSAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ProgressListener;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -44,6 +45,7 @@ import java.util.TimeZone;
 import java.util.WeakHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -999,6 +1001,69 @@ public final class LogPersister {
         //If no files were sent to the server and this was reached with no errors, it means that the onSuccess should be called if it exists.
         if(listener != null && amountOfLogFilesSentToServer <= 0){
             listener.onSuccess(null);
+        }
+    }
+
+    public synchronized static void sendInAppFeedBackFile(String zipFileWithPath, ResponseListener listener) {
+
+        if (context == null) {
+            // no need to log
+            return;
+        }
+
+        String appRoute;
+        String feedbackUploaderURL;
+        File fileToSend = new File(zipFileWithPath);
+
+        if(!fileToSend.exists()){
+            listener.onFailure(null, new IllegalArgumentException("Zip File "+zipFileWithPath + " doesnt exists"), null);
+            return;
+        }
+
+        BMSClient client = BMSClient.getInstance();
+
+        appRoute = client.getDefaultProtocol() + "://" + LOG_UPLOADER_APP_ROUTE + client.getBluemixRegionSuffix();
+
+        if (BMSAnalytics.overrideServerHost != null) {
+            appRoute = BMSAnalytics.overrideServerHost;
+        }
+
+        feedbackUploaderURL = appRoute + FEEDBACK_UPLOADER_PATH;
+
+        System.out.println("feedbackUploaderURL: "+feedbackUploaderURL);
+        LogPersister1.SendLogsRequestListener requestListener = new LogPersister1.SendLogsRequestListener(fileToSend, listener, false, feedbackUploaderURL);
+
+        Request sendLogsRequest = new Request(feedbackUploaderURL, Request.POST);
+
+        //sendLogsRequest.addHeader("Content-Type", BaseRequest.BINARY_CONTENT_TYPE);
+        //sendLogsRequest.addHeader("Content-Type", "application/zip");
+        sendLogsRequest.addHeader("Content-Type", "multipart/form-data");
+
+        if (BMSAnalytics.getClientApiKey() != null && !BMSAnalytics.getClientApiKey().equalsIgnoreCase("")) {
+            sendLogsRequest.addHeader("x-mfp-analytics-api-key", BMSAnalytics.getClientApiKey());
+        } else {
+            requestListener.onFailure(null, new IllegalArgumentException("Client API key has not been set."), null);
+            return;
+        }
+
+        ProgressListener progressListner = new LogPersister1.SendFeedBackProgressListner(fileToSend.length());
+
+        sendLogsRequest.upload(null, fileToSend, progressListner, requestListener);
+    }
+
+    static class SendFeedBackProgressListner implements ProgressListener {
+
+        long numberOfOnProgressCalls = 1;
+        CountDownLatch countDown = null;
+
+        public SendFeedBackProgressListner(long playloadLength){
+            numberOfOnProgressCalls = playloadLength / 2048 + 1;
+            countDown = new CountDownLatch((int)numberOfOnProgressCalls);
+        }
+
+        @Override
+        public void onProgress(long bytesSoFar, long totalBytesExpected) {
+            countDown.countDown();
         }
     }
 

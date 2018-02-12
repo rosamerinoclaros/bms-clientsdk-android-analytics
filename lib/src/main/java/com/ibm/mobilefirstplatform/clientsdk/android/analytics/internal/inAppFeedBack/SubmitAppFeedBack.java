@@ -1,4 +1,4 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedback;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,6 +30,8 @@ public class SubmitAppFeedBack extends AlertDialog {
 
     public SubmitAppFeedBack(Activity activity) {
         super(activity);
+
+        Utility.sendLogsToServer();
         this.setTitle("App Feedback Sent");
         this.setMessage("Thanks for the feedback, you make our app better!");
         this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new PositiveButtonClick(activity));

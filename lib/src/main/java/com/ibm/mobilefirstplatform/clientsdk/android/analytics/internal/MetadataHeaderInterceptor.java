@@ -66,6 +66,7 @@ public class MetadataHeaderInterceptor implements Interceptor {
                 .header(ANALYTICS_DEVICE_METADATA_HEADER_NAME, analyticsMetadataHeaderObject.toString())
                 .build();
 
+        System.out.println("metadataHeader inside intercept: " + analyticsMetadataHeaderObject.toString());
 
         okhttp3.Response response = chain.proceed(requestWithHeaders);
 
@@ -104,6 +105,8 @@ public class MetadataHeaderInterceptor implements Interceptor {
         } catch (JSONException e) {
             // there is no way this exception gets thrown when adding simple strings to a JSONObject
         }
+
+        System.out.println("metadataHeader: " + metadataHeader.toString());
         return metadataHeader;
     }
 
