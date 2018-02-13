@@ -1,12 +1,9 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.icu.util.Freezable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -77,7 +74,7 @@ public class ReviewPopup extends Activity {
         final HashMap<String, Object> frameLayoutMap = new HashMap<>();
         currentEnabledButton = null;
 
-        for(final String filename : fileList){
+        for(final String instanceName : fileList){
 
             final FrameLayout frameLayout = new FrameLayout(this);
             frameLayout.setLayoutParams(params);
@@ -100,9 +97,9 @@ public class ReviewPopup extends Activity {
             closebutton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Utility.discardFeedbackFiles(filename);
+                    Utility.discardFeedbackFiles(instanceName);
                     imageButtonlayout.removeView(frameLayout);
-                    fileList = Utility.removeItemFromList(fileList, filename);
+                    fileList = Utility.removeItemFromList(fileList, instanceName);
 
                     //Remove the current view and show first image in the imageView
                     if(fileList.size()>0){
@@ -124,12 +121,12 @@ public class ReviewPopup extends Activity {
             imageButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageButton.setAdjustViewBounds(true);
             imageButton.setScaleType(ImageView.ScaleType.FIT_XY);
-            Utility.loadImageFromLocalStore(this, filename, imageButton);
+            Utility.loadImageFromLocalStore(this, Utility.getImageFileName(instanceName), imageButton);
             frameLayout.addView(imageButton);
 
             frameLayout.addView(closebutton);
             imageButtonlayout.addView(frameLayout);
-            frameLayoutMap.put(filename, frameLayout);
+            frameLayoutMap.put(instanceName, frameLayout);
 
             imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -139,17 +136,17 @@ public class ReviewPopup extends Activity {
                     }
                     frameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
                     currentEnabledButton = frameLayout;
-                    showEditedImageWithComment(filename);
+                    showEditedImageWithComment(instanceName);
                 }
             });
 
-            if(filename.equals(fileNameFromIntentBundle)){
+            if(instanceName.equals(fileNameFromIntentBundle)){
                 if(currentEnabledButton!=null){
                     currentEnabledButton.setBackgroundColor(Color.parseColor("#E8EAF6"));
                 }
                 frameLayout.setBackgroundColor(Color.parseColor("#90CAF9"));
                 currentEnabledButton = frameLayout;
-                showEditedImageWithComment(filename);
+                showEditedImageWithComment(instanceName);
                 isImageViewSet = true;
             }
         }
@@ -199,20 +196,20 @@ public class ReviewPopup extends Activity {
         });
     }
 
-    private void showEditedImageWithComment(String filename){
+    private void showEditedImageWithComment(String instanceName){
         LinearLayout linearLayout = (LinearLayout)findViewById(R.id.relative_view);
         linearLayout.removeAllViews();
 
 
         ImageView imageView = new ImageView(this);
-        imageView.setTag(filename);
+        imageView.setTag(instanceName);
         imageView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         imageView.getLayoutParams().height = (int)(getWindowManager().getDefaultDisplay().getHeight() * 0.70);
         imageView.setBackgroundColor(Color.parseColor("#FDC3A2"));
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Utility.loadImageFromLocalStore(this, filename, imageView);
+        Utility.loadImageFromLocalStore(this, Utility.getImageFileName(instanceName), imageView);
 
         //for (int i=0; i < 2; i++){
             Toast toast = Toast.makeText(this, "Scroll Down To View the Comments", Toast.LENGTH_LONG);
@@ -224,7 +221,7 @@ public class ReviewPopup extends Activity {
         linearLayout.addView(drawLine());
 
         int i=0;
-        for (String comment : Utility.fetchCommentsFromJSONFile(Utility.fetchJSONfileName(filename))) {
+        for (String comment : Utility.fetchCommentsFromJSONFile(Utility.getJSONfileName(instanceName))) {
             i++;
             System.out.println("value= " + comment);
 

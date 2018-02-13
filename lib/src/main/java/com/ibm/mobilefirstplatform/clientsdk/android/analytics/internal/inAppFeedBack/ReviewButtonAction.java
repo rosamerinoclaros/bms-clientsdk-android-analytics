@@ -48,6 +48,17 @@ public class ReviewButtonAction extends AlertDialog{
         public void onClick(DialogInterface dialog, int which) {
             //Discard the changes and close the feedback activity
             Utility.discardFeedbackFiles(filename);
+
+            String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+            if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
+                String alertReasonString = "No feedback comments available to review. \n Please go back and create feedback!";
+
+                AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage(alertReasonString);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK,GOT IT", new PositiveButtonClick(activity));
+                alertDialog.show();
+            }
             Intent intent = new Intent(activity, com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.ReviewPopup.class);
             //intent.putExtra("imagename", filename);
             activity.startActivityForResult(intent, 200);
@@ -70,6 +81,23 @@ public class ReviewButtonAction extends AlertDialog{
         }
     }
 
+    /**
+     * Clicking "OK, GOT IT"
+     */
+    private static class PositiveButtonClick implements OnClickListener {
+        private Activity activity;
+
+        public PositiveButtonClick(Activity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.setResult(200,null);
+            activity.finish();
+        }
+    }
+
     public ReviewButtonAction(Activity activity, String filename, boolean isEdited) {
         super(activity);
 
@@ -86,8 +114,9 @@ public class ReviewButtonAction extends AlertDialog{
         if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
             alertReasonString = "No feedback comments available to review. \n Please go back and create feedback!";
 
+            this.setTitle("Alert");
             this.setMessage(alertReasonString);
-            this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new Option3(activity));
+            this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new PositiveButtonClick(activity));
         }else {
             if (isEdited) {
                 alertReasonString = "All Data & comments made can be reviewed. \n Do you want to continue?";

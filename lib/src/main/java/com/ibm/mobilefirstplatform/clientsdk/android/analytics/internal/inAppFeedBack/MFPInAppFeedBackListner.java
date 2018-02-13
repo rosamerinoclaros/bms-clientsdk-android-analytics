@@ -77,9 +77,9 @@ public class MFPInAppFeedBackListner {
                 public void run() {
 
                     Bitmap image = ScreenShot.takeScreenShotOfRootView(activity.getWindow().getDecorView().getRootView());
-                    String filename = Utility.generateUniqueImageFileName(activity.getClass().getName());
+                    String filename = Utility.generateUniqueFileName(activity.getClass().getName());
                     System.out.println("UniqueFileName:" + filename);
-                    Utility.saveIamgeToLocalStore(image, filename);
+                    Utility.saveIamgeToLocalStore(image, Utility.getImageFileName(filename));
 
                     Intent intent = new Intent(activity, EditorPopup.class);
                     intent.putExtra("imagename", filename);

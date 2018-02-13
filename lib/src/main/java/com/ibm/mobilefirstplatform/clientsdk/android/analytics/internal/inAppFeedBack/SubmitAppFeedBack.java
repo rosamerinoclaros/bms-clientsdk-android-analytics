@@ -68,24 +68,24 @@ public class SubmitAppFeedBack extends AlertDialog {
 
                 //Add timeSent to all the json file's which are not set with timeSent
                 for (int i = 0; i < savedArray.length(); i++) {
-                    String element = (String) savedArray.get(i);
-                    String screenFeedBackJsonFile = Utility.fetchJSONfileName(element);
+                    String instanceName = (String) savedArray.get(i);
+                    String screenFeedBackJsonFile = Utility.getJSONfileName(instanceName);
                     String actualTimeSent = Utility.addAndFetchSentTimeFromScreenFeedBackJson(screenFeedBackJsonFile, timeSent);
-                    timeSentMap.put(element,actualTimeSent);
+                    timeSentMap.put(instanceName,actualTimeSent);
                 }
 
                 //Iterate each feedback element which is not yet sent
                 for (int i = 0; i < savedArray.length(); i++)   {
-                    String element = (String)savedArray.get(i);
-                    String screenFeedBackJsonFile = Utility.fetchJSONfileName(element);
-                    String actualTimeSent = timeSentMap.get(element);
+                    String instanceName = (String)savedArray.get(i);
+                    String screenFeedBackJsonFile = Utility.getJSONfileName(instanceName);
+                    String actualTimeSent = timeSentMap.get(instanceName);
 
-                    String zipFile = Utility.storageDirectory+element+"_"+ actualTimeSent+".zip";
+                    String zipFile = Utility.storageDirectory+instanceName+"_"+ actualTimeSent+".zip";
                     List<String> fileList = new ArrayList<>();
-                    fileList.add(element);
+                    fileList.add(Utility.getImageFileName(instanceName));
                     fileList.add(screenFeedBackJsonFile);
                     Utility.createZipArchive(fileList,zipFile);
-                    LogPersister.sendInAppFeedBackFile(zipFile, new FeedBackUploadResponseListener(element,zipFile,actualTimeSent));
+                    LogPersister.sendInAppFeedBackFile(zipFile, new FeedBackUploadResponseListener(instanceName,zipFile,actualTimeSent));
                 }
 
             }catch (JSONException je){
@@ -111,7 +111,7 @@ public class SubmitAppFeedBack extends AlertDialog {
                 // regardless of success or failure, reaching this code indicates we successfully communicated with the WL server (we got a reply).
 
                 if(response.getStatus() == 201){
-                    Log.i(Utility.LOG_TAG_NAME, "Successfully POSTed feedback data for the file " + element + ".  HTTP response code: " + response.getStatus());
+                    Log.i(Utility.LOG_TAG_NAME, "Successfully POSTed feedback data for the instance " + element + ".  HTTP response code: " + response.getStatus());
 
                     // Thus, we should delete:
                     File zip = new File(zipFile);

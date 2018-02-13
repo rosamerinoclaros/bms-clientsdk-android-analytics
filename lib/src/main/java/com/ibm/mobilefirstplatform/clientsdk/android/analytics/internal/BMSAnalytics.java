@@ -89,6 +89,8 @@ public class BMSAnalytics {
     public static final String USER_SWITCH_CATEGORY = "userSwitch";
     public static final String INITIAL_CTX_CATEGORY = "initialCtx";
 
+    protected static Activity currentActivity;
+
     public static String overrideServerHost = null;
     /**
      * Initialize BMSAnalytics API.
@@ -338,8 +340,8 @@ public class BMSAnalytics {
         return appName;
     }
 
-    public static void triggerFeedbackMode(Activity activity){
-        MFPInAppFeedBackListner.triggerFeedbackMode(activity);
+    public static void triggerFeedbackMode(){
+        MFPInAppFeedBackListner.triggerFeedbackMode(currentActivity);
     }
 
     /**
@@ -376,6 +378,7 @@ public class BMSAnalytics {
 
         @Override
         public void onActivityStarted(Activity activity) {
+            currentActivity = activity;
         }
 
         @Override

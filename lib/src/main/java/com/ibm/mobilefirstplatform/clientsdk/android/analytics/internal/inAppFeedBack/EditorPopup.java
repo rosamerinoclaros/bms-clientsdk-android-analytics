@@ -56,7 +56,7 @@ public class EditorPopup extends Activity{
     private boolean allowComment;
     private boolean fileSaved;
     private int count;
-    private String filename;
+    private String instanceName;
     private List<String> commentList;
     private boolean isEdited;
 
@@ -98,8 +98,8 @@ public class EditorPopup extends Activity{
         imageView.getLayoutParams().width = (int)(getWindowManager().getDefaultDisplay().getWidth() * 0.95);
 
         Bundle extras = getIntent().getExtras();
-        filename = extras.getString("imagename");
-        loadImageFromLocalStore(filename);
+        instanceName = extras.getString("imagename");
+        loadImageFromLocalStore(Utility.getImageFileName(instanceName));
 
         paintDraw = new Paint();
         paintDraw.setStyle(Paint.Style.FILL);
@@ -139,9 +139,9 @@ public class EditorPopup extends Activity{
                 if(isEdited){
                     saveImageAndComment();
                 }else{
-                    Utility.discardFeedbackFiles(filename);
+                    Utility.discardFeedbackFiles(instanceName);
                 }
-                new ReviewButtonAction(EditorPopup.this, filename, isEdited).show();
+                new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
             }
         });
 
@@ -231,16 +231,16 @@ public class EditorPopup extends Activity{
 
     private void saveImageAndComment(){
         if(!fileSaved){
-            Utility.saveIamgeToLocalStore(bitmapMaster, filename);
+            Utility.saveIamgeToLocalStore(bitmapMaster, Utility.getImageFileName(instanceName));
 
             //ScreenFeedback.json
             JSONObject screenFeedBackJSON = new JSONObject();
 
-            String screenName = Utility.getScreenName(filename);
+            String screenName = Utility.getScreenName(instanceName);
             String deviceID = Utility.getDeviceID(MFPInAppFeedBackListner.getContext());
-            String timeCreated  = Utility.getTimeCreated(filename);
+            String timeCreated  = Utility.getTimeCreated(instanceName);
             String id = deviceID+ "_" + screenName +"_" + timeCreated;
-            String jsonFileName = Utility.fetchJSONfileName(filename);
+            String jsonFileName = Utility.getJSONfileName(instanceName);
 
             JSONArray commentJSON = new JSONArray();
             for(String comment: commentList){
@@ -251,7 +251,7 @@ public class EditorPopup extends Activity{
                 screenFeedBackJSON.put("id", id);
                 //screenFeedBackJSON.put("timeSent", null);
                 screenFeedBackJSON.put("comments", commentJSON);
-                screenFeedBackJSON.put("image", filename);
+                screenFeedBackJSON.put("image", instanceName);
             } catch (JSONException e) {
                 //No chance of getting here
             }
@@ -264,10 +264,10 @@ public class EditorPopup extends Activity{
                 if(!afbs.equals("")){
                     appFeedBacksummaryJSON = new JSONObject(afbs);
                     JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
-                    savedArray.put(filename);
+                    savedArray.put(instanceName);
                 }else{
                     //create new instance
-                    appFeedBacksummaryJSON.put("saved", new JSONArray().put(filename));
+                    appFeedBacksummaryJSON.put("saved", new JSONArray().put(instanceName));
                     appFeedBacksummaryJSON.put("send", new JSONObject());
                 }
             }catch (JSONException je){
@@ -324,8 +324,8 @@ public class EditorPopup extends Activity{
         }
     }
 
-    private void loadImageFromLocalStore(String filename){
-        Bitmap tempBitmap = Utility.getTempBitMap(this,filename);
+    private void loadImageFromLocalStore(String imageFilename){
+        Bitmap tempBitmap = Utility.getTempBitMap(this,imageFilename);
         bitmapMaster = Utility.getMasterBitMap(tempBitmap);
         canvasMaster = Utility.getCanvas(tempBitmap,bitmapMaster);
         imageView.setImageBitmap(bitmapMaster);
@@ -335,7 +335,7 @@ public class EditorPopup extends Activity{
         if(isEdited){
             saveImageAndComment();
         }
-        new DismissAppFeedBack(this, filename, isEdited).show();
+        new DismissAppFeedBack(this, instanceName, isEdited).show();
     }
 
     @Override

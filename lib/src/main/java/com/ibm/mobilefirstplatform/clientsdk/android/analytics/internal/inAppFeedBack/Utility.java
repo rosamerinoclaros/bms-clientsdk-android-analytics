@@ -1,15 +1,21 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageView;
+
+import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
+import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +39,8 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import okhttp3.internal.Util;
+
 /**
  * Created by mohlogan on 06/01/18.
  */
@@ -41,6 +49,7 @@ public class Utility {
 
     protected static String storageDirectory = null;
     protected static final String LOG_TAG_NAME = Utility.class.getName();
+    protected static String appFeedBackSummaryFile = "AppFeedBackSummary.json";
 
     protected static float dipToPixels(Context applicationContext, int dipValue) {
         DisplayMetrics metrics = applicationContext.getResources().getDisplayMetrics();
@@ -134,24 +143,6 @@ public class Utility {
         }
     }
 
-    protected static List<String> getImageFileList(){
-        List<String> list = new ArrayList<>();
-        String path = Utility.storageDirectory;
-        System.out.println("Path: " + path);
-
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-
-        System.out.println("Size: "+ files.length);
-        for (int i = 0; i < files.length; i++){
-            if(files[i].getName().endsWith(".png")){
-                System.out.println("Image FileName:" + files[i].getName());
-                list.add(files[i].getName());
-            }
-        }
-        return list;
-    }
-
     /**
      * Return image list which yet to be reviewed. i.e ScreenFeedBack.json doesnt have timeSent set.
      * @return
@@ -159,7 +150,7 @@ public class Utility {
     protected static List<String> getCurrentImageSetForReview(){
         List<String> list = new ArrayList<>();
 
-        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+        String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
         if ( !appFeedBackSummary.equals("") && !appFeedBackSummary.equals("{}") ) {
             try {
                 JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
@@ -167,7 +158,7 @@ public class Utility {
 
                 for (int i = 0; i < savedArray.length(); i++) {
                     String element = (String) savedArray.get(i);
-                    String screenFeedBackJsonFile = fetchJSONfileName(element);
+                    String screenFeedBackJsonFile = getJSONfileName(element);
                     JSONObject screenFeedBackJson = new JSONObject(Utility.convertFileToString(screenFeedBackJsonFile));
                     try{
                         screenFeedBackJson.get("timeSent");
@@ -226,20 +217,22 @@ public class Utility {
     }
 
 
-    protected static String fetchCommentfileName(String imageFileName){
-        return imageFileName.replace(".png", ".txt");
+    protected static String fetchCommentfileName(String instanceName){
+        return instanceName.replace(".png", ".txt");
     }
 
-    protected static String fetchJSONfileName(String imageFileName){
-        return imageFileName.replace(".png", ".json");
+    protected static String getJSONfileName(String instanceName){
+        //return instanceName.replace(".png", ".json");
+        return instanceName+".json";
     }
 
-    protected static String getScreenName(String imageFileName){
-        return imageFileName.substring(0,imageFileName.indexOf("_"));
+    protected static String getScreenName(String instanceFileName){
+        return instanceFileName.substring(0,instanceFileName.indexOf("_"));
     }
 
-    protected static String getTimeCreated(String imageFileName){
-        return imageFileName.substring(imageFileName.indexOf("_")+1, imageFileName.lastIndexOf("."));
+    protected static String getTimeCreated(String instanceFileName){
+        //return instanceFileName.substring(instanceFileName.indexOf("_")+1, instanceFileName.lastIndexOf("."));
+        return instanceFileName.substring(instanceFileName.indexOf("_")+1);
     }
 
     protected static String getDeviceID(Context context) {
@@ -294,7 +287,7 @@ public class Utility {
         String path = Utility.storageDirectory;
 
         //Delete image file
-        File file = new File(path, filename);
+        File file = new File(path, getImageFileName(filename));
         if (file.exists()) {
             if (!file.delete()) {
                 Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
@@ -302,7 +295,7 @@ public class Utility {
         }
 
         //Delete Json file if exists
-        File jsonFile = new File(path, fetchJSONfileName(filename));
+        File jsonFile = new File(path, getJSONfileName(filename));
         if (jsonFile.exists()) {
             if (!jsonFile.delete()) {
                 Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
@@ -310,7 +303,7 @@ public class Utility {
         }
 
         //Delete entry from saved AppFeedBackSummary.json
-        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+        String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
         if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || !appFeedBackSummary.contains(filename)) {
             //Do Nothing
         } else {
@@ -321,7 +314,7 @@ public class Utility {
                 savedArray = removeEntry(savedArray,filename);
                 appFeedBacksummaryJSON.put("saved", savedArray);
                 appFeedBacksummaryJSON.put("send", sentObject);
-                addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(),false);
+                addDataToFile(appFeedBackSummaryFile, appFeedBacksummaryJSON.toString(),false);
             } catch (JSONException je) {
                 //should not get any exception
                 je.printStackTrace();
@@ -329,11 +322,16 @@ public class Utility {
         }
     }
 
-    protected static String generateUniqueImageFileName(String baseName){
+    protected static String generateUniqueFileName(String baseName){
         long now = new Date().getTime();
         //String nowString = (String) android.text.format.DateFormat.format("yyyy_MM_dd_hhmmss", now);
-        baseName +="_"+now+".png";
+        //baseName +="_"+now+".png";
+        baseName +="_"+now;
         return baseName;
+    }
+
+    protected static String getImageFileName(String baseName){
+        return baseName+".png";
     }
 
     protected static List removeItemFromList(List fileList, String fileEntryToRemove){
@@ -385,42 +383,6 @@ public class Utility {
         }
     }
 
-    private static JSONObject createCommentJSONObject() {
-        List<String> fileList = getImageFileList();
-        JSONObject commentJSON = new JSONObject();
-        try {
-            for (final String filename : fileList) {
-
-                JSONArray comment = new JSONArray();
-                String commentFileName = fetchCommentfileName(filename);
-                File commentFile = new File(Utility.storageDirectory + "/" + commentFileName);
-
-                if (commentFile.exists()) {
-                    try {
-                        BufferedReader br = new BufferedReader(new FileReader(commentFile));
-                        String line;
-
-                        int i =0;
-                        while ((line = br.readLine()) != null) {
-                            comment.put(line.substring(line.indexOf("=")+1));
-                            i++;
-                        }
-                        br.close();
-
-                    } catch (IOException e) {
-                        //nothing to do
-                    }
-                }
-                commentJSON.put(filename, comment);
-            }
-        }catch (JSONException e) {
-            //Nothing to do
-        }
-
-        Log.i(Utility.LOG_TAG_NAME, "Comment JSON: " + commentJSON.toString());
-        return commentJSON;
-    }
-
     protected static String addAndFetchSentTimeFromScreenFeedBackJson(String jsonFile, long timeSent){
         String screenFeedBackJsonString = Utility.convertFileToString(jsonFile);
         String actualTimeSent = null;
@@ -463,7 +425,7 @@ public class Utility {
     }
 
     protected synchronized static void updateSummaryJson(String sentElement, String timeSent) {
-        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+        String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
         Log.i(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
         if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}")) {
             return;
@@ -493,7 +455,7 @@ public class Utility {
                 appFeedBacksummaryJSON.put("saved",savedArray);
                 appFeedBacksummaryJSON.put("send", sentObject);
                 Log.i(Utility.LOG_TAG_NAME, "appFeedBackSummary: " + appFeedBacksummaryJSON.toString());
-                Utility.addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(), false);
+                Utility.addDataToFile(appFeedBackSummaryFile, appFeedBacksummaryJSON.toString(), false);
             }catch (JSONException je){
                 je.printStackTrace();
             }
