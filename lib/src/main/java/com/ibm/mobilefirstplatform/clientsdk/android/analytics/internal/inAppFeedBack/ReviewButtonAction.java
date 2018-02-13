@@ -81,24 +81,33 @@ public class ReviewButtonAction extends AlertDialog{
 
         titleString = "Review App Feedback?";
         this.setTitle(titleString);
-        if (isEdited) {
-            alertReasonString = "All Data & comments made can be reviewed. \n Do you want to continue?";
-            optionString1 = "SAVE, REVIEW";
-            optionString2 = "DISCARD, REVIEW";
-            optionString3 = "NO, CANCEL";
+
+        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+        if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
+            alertReasonString = "No feedback comments available to review. \n Please go back and create feedback!";
 
             this.setMessage(alertReasonString);
-            this.setButton(AlertDialog.BUTTON_POSITIVE, optionString1, new Option1(activity, filename));
-            this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity,filename));
-            this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
-        } else {
-            alertReasonString = "No Comments. \n Do you want to review other feedback's?";
-            optionString2 = "YES, REVIEW";
-            optionString3 = "NO, CANCEL";
+            this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new Option3(activity));
+        }else {
+            if (isEdited) {
+                alertReasonString = "All Data & comments made can be reviewed. \n Do you want to continue?";
+                optionString1 = "SAVE, REVIEW";
+                optionString2 = "DISCARD, REVIEW";
+                optionString3 = "NO, CANCEL";
 
-            this.setMessage(alertReasonString);
-            this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity, filename));
-            this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
+                this.setMessage(alertReasonString);
+                this.setButton(AlertDialog.BUTTON_POSITIVE, optionString1, new Option1(activity, filename));
+                this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity,filename));
+                this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
+            } else {
+                alertReasonString = "No Comments. \n Do you want to review other feedback's?";
+                optionString2 = "YES, REVIEW";
+                optionString3 = "NO, CANCEL";
+
+                this.setMessage(alertReasonString);
+                this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity, filename));
+                this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
+            }
         }
     }
 }

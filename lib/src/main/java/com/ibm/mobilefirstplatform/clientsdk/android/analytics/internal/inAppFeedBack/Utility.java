@@ -11,10 +11,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
-import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +27,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -44,21 +39,20 @@ import java.util.zip.ZipOutputStream;
 
 public class Utility {
 
-    private static String storageDirectory = null;
-    private static String FEEDBACK_STORAGE_LOCATION="/feedback/";
-    public static final String LOG_TAG_NAME = Utility.class.getName();
+    protected static String storageDirectory = null;
+    protected static final String LOG_TAG_NAME = Utility.class.getName();
 
-    public static float dipToPixels(Context applicationContext, int dipValue) {
+    protected static float dipToPixels(Context applicationContext, int dipValue) {
         DisplayMetrics metrics = applicationContext.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
-    public static float spToPixels(Context applicationContext, float spValue) {
+    protected static float spToPixels(Context applicationContext, float spValue) {
         DisplayMetrics metrics = applicationContext.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, metrics);
     }
 
-    public static Bitmap getTempBitMap(Context applicationContext, String filename){
+    protected static Bitmap getTempBitMap(Context applicationContext, String filename){
         Bitmap bitmap = null;
         try {
             Uri uri = Uri.parse("file://" + Utility.storageDirectory + filename);
@@ -69,7 +63,7 @@ public class Utility {
         return bitmap;
     }
 
-    public static Bitmap getMasterBitMap(Bitmap tempBitmap) {
+    protected static Bitmap getMasterBitMap(Bitmap tempBitmap) {
         Bitmap bitmapMaster = null;
         Bitmap.Config config;
         if(tempBitmap.getConfig() != null){
@@ -87,13 +81,13 @@ public class Utility {
         return bitmapMaster;
     }
 
-    public static Canvas getCanvas(Bitmap tempBitmap, Bitmap bitmapMaster ){
+    protected static Canvas getCanvas(Bitmap tempBitmap, Bitmap bitmapMaster ){
         Canvas canvasMaster = new Canvas(bitmapMaster);
         canvasMaster.drawBitmap(tempBitmap, 0, 0, null);
         return canvasMaster;
     }
 
-    public static void loadImageFromLocalStore(Context applicationContext, String filename, ImageView imageView) {
+    protected static void loadImageFromLocalStore(Context applicationContext, String filename, ImageView imageView) {
         try {
             Uri uri = Uri.parse("file://" + Utility.storageDirectory + filename);
             Bitmap tempBitmap = BitmapFactory.decodeStream(applicationContext.getContentResolver().openInputStream(uri));
@@ -120,7 +114,7 @@ public class Utility {
         }
     }
 
-    public static void saveIamgeToLocalStore(Bitmap finalBitmap, String fileName) {
+    protected static void saveIamgeToLocalStore(Bitmap finalBitmap, String fileName) {
         File myDir = new File(Utility.storageDirectory);
         myDir.mkdirs();
 
@@ -140,7 +134,7 @@ public class Utility {
         }
     }
 
-    public static List<String> getImageFileList(){
+    protected static List<String> getImageFileList(){
         List<String> list = new ArrayList<>();
         String path = Utility.storageDirectory;
         System.out.println("Path: " + path);
@@ -162,7 +156,7 @@ public class Utility {
      * Return image list which yet to be reviewed. i.e ScreenFeedBack.json doesnt have timeSent set.
      * @return
      */
-    public static List<String> getCurrentImageSetForReview(){
+    protected static List<String> getCurrentImageSetForReview(){
         List<String> list = new ArrayList<>();
 
         String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
@@ -188,28 +182,7 @@ public class Utility {
         return list;
     }
 
-    public static List<String> fetchCommentsFromFile(String commentfile) {
-        List<String> list = new ArrayList<>();
-        String dir = Utility.storageDirectory;
-        File file = new File(dir, commentfile);
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                System.out.println("fetchCommentsFromFile=" + line);
-                list.add(line.substring(line.indexOf("=")+1));
-            }
-            br.close();
-        }catch (IOException e) {
-            //e.printStackTrace();
-        }
-
-        return list;
-    }
-
-    public static List<String> fetchCommentsFromJSONFile(String jsonFile) {
+    protected static List<String> fetchCommentsFromJSONFile(String jsonFile) {
 
         List<String> list = new ArrayList<>();
         String jsonString = convertFileToString(jsonFile);
@@ -229,7 +202,7 @@ public class Utility {
         return list;
     }
 
-    public static String convertFileToString(String fileName) {
+    protected static String convertFileToString(String fileName) {
 
         String returnStr = "";
         String dir = Utility.storageDirectory;
@@ -253,11 +226,11 @@ public class Utility {
     }
 
 
-    public static String fetchCommentfileName(String imageFileName){
+    protected static String fetchCommentfileName(String imageFileName){
         return imageFileName.replace(".png", ".txt");
     }
 
-    public static String fetchJSONfileName(String imageFileName){
+    protected static String fetchJSONfileName(String imageFileName){
         return imageFileName.replace(".png", ".json");
     }
 
@@ -275,7 +248,7 @@ public class Utility {
         return UUID.nameUUIDFromBytes(uuid.getBytes()).toString();
     }
 
-    public static void addDataToFile(String fileName, String data, boolean append){
+    protected static void addDataToFile(String fileName, String data, boolean append){
         String dir = Utility.storageDirectory;
         File file = new File(dir, fileName);
         try {
@@ -288,7 +261,7 @@ public class Utility {
         }
     }
 
-    public static void deleteAllFiles(){
+    protected static void deleteAllFiles(){
         String path = Utility.storageDirectory;
 
         File directory = new File(path);
@@ -317,34 +290,53 @@ public class Utility {
         }
     }
 
-    public static void discardFeedbackFiles(String filename){
+    protected static void discardFeedbackFiles(String filename) {
         String path = Utility.storageDirectory;
 
         //Delete image file
-        File file = new File(path,filename);
-        if(file.exists()){
+        File file = new File(path, filename);
+        if (file.exists()) {
             if (!file.delete()) {
                 Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
             }
         }
 
         //Delete Json file if exists
-        File jsonFile = new File(path,fetchJSONfileName(filename));
-        if(jsonFile.exists()){
+        File jsonFile = new File(path, fetchJSONfileName(filename));
+        if (jsonFile.exists()) {
             if (!jsonFile.delete()) {
                 Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
             }
         }
+
+        //Delete entry from saved AppFeedBackSummary.json
+        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+        if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || !appFeedBackSummary.contains(filename)) {
+            //Do Nothing
+        } else {
+            try {
+                JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
+                JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
+                JSONObject sentObject = (JSONObject) appFeedBacksummaryJSON.get("send");
+                savedArray = removeEntry(savedArray,filename);
+                appFeedBacksummaryJSON.put("saved", savedArray);
+                appFeedBacksummaryJSON.put("send", sentObject);
+                addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(),false);
+            } catch (JSONException je) {
+                //should not get any exception
+                je.printStackTrace();
+            }
+        }
     }
 
-    public static String generateUniqueImageFileName(String baseName){
+    protected static String generateUniqueImageFileName(String baseName){
         long now = new Date().getTime();
         //String nowString = (String) android.text.format.DateFormat.format("yyyy_MM_dd_hhmmss", now);
         baseName +="_"+now+".png";
         return baseName;
     }
 
-    public static List removeItemFromList(List fileList, String fileEntryToRemove){
+    protected static List removeItemFromList(List fileList, String fileEntryToRemove){
         Iterator<String> iterator = fileList.iterator();
         while (iterator.hasNext()) {
             String filename = iterator.next();
@@ -356,13 +348,13 @@ public class Utility {
         return fileList;
     }
 
-    public static void setStorageLocation(Context context){
+    protected static void setStorageLocation(Context context){
         Utility.storageDirectory = context.getFilesDir().getPath()+"/feedback/";
         Log.i(Utility.LOG_TAG_NAME, "Utility.storageDirectory: "+Utility.storageDirectory);
     }
 
 
-    private static void createZipArchive(List<String> fileList, String zipFile){
+    protected static void createZipArchive(List<String> fileList, String zipFile){
         try {
             int BUFFER = 512;
             BufferedInputStream origin = null;
@@ -429,61 +421,7 @@ public class Utility {
         return commentJSON;
     }
 
-    /*protected static void sendLogsToServer1(){
-
-        long now = new Date().getTime();
-        final String zipFile = Utility.storageDirectory+"feedback_"+ now+".zip";
-
-        String commentFileName = "CommentFile.json";
-        JSONObject commentJSON = createCommentJSONObject();
-        List<String> fileList = getImageFileList();
-
-        addDataToFile(commentFileName, commentJSON.toString(), false);
-        fileList.add(commentFileName);
-        createZipArchive(fileList, zipFile);
-        LogPersister.sendInAppFeedBackFile(zipFile, new FeedBackUploadResponseListener());
-    }*/
-
-    protected static void sendLogsToServer(){
-        long timeSent = new Date().getTime();
-        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
-        if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") ) {
-            return;
-        }else{
-            try{
-                JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
-                JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
-                HashMap<String, String> timeSentMap = new HashMap<>();
-
-                //Add timeSent to all the json file's which are not set with timeSent
-                for (int i = 0; i < savedArray.length(); i++) {
-                    String element = (String) savedArray.get(i);
-                    String screenFeedBackJsonFile = fetchJSONfileName(element);
-                    String actualTimeSent = addAndFetchSentTimeFromScreenFeedBackJson(screenFeedBackJsonFile, timeSent);
-                    timeSentMap.put(element,actualTimeSent);
-                }
-
-                //Iterate each feedback element which is not yet sent
-                for (int i = 0; i < savedArray.length(); i++)   {
-                    String element = (String)savedArray.get(i);
-                    String screenFeedBackJsonFile = fetchJSONfileName(element);
-                    String actualTimeSent = timeSentMap.get(element);
-
-                    String zipFile = Utility.storageDirectory+element+"_"+ actualTimeSent+".zip";
-                    List<String> fileList = new ArrayList<>();
-                    fileList.add(element);
-                    fileList.add(screenFeedBackJsonFile);
-                    createZipArchive(fileList,zipFile);
-                    LogPersister.sendInAppFeedBackFile(zipFile, new FeedBackUploadResponseListener(element,zipFile,actualTimeSent));
-                }
-
-            }catch (JSONException je){
-
-            }
-        }
-    }
-
-    private static String addAndFetchSentTimeFromScreenFeedBackJson(String jsonFile, long timeSent){
+    protected static String addAndFetchSentTimeFromScreenFeedBackJson(String jsonFile, long timeSent){
         String screenFeedBackJsonString = Utility.convertFileToString(jsonFile);
         String actualTimeSent = null;
         try{
@@ -506,7 +444,7 @@ public class Utility {
         return actualTimeSent;
     }
 
-    private static JSONArray removeEntry(JSONArray inputJsonArray, String entryToRemove){
+    protected static JSONArray removeEntry(JSONArray inputJsonArray, String entryToRemove){
 
         JSONArray output = new JSONArray();
         int len = inputJsonArray.length();
@@ -524,7 +462,7 @@ public class Utility {
         return output;
     }
 
-    private synchronized static void updateSummaryJson(String sentElement, String timeSent) {
+    protected synchronized static void updateSummaryJson(String sentElement, String timeSent) {
         String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
         Log.i(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
         if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}")) {
@@ -558,59 +496,6 @@ public class Utility {
                 Utility.addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(), false);
             }catch (JSONException je){
                 je.printStackTrace();
-            }
-        }
-    }
-
-    static class FeedBackUploadResponseListener implements ResponseListener {
-        private String element;
-        private String zipFile;
-        private String timeSent;
-
-        public FeedBackUploadResponseListener(String element, String zipFile, String timeSent){
-            this.element=element;
-            this.zipFile=zipFile;
-            this.timeSent=timeSent;
-        }
-
-        @Override
-        public void onSuccess(Response response) {
-            try{
-                // regardless of success or failure, reaching this code indicates we successfully communicated with the WL server (we got a reply).
-
-                if(response.getStatus() == 201){
-                    Log.i(Utility.LOG_TAG_NAME, "Successfully POSTed feedback data for the file " + element + ".  HTTP response code: " + response.getStatus());
-
-                    // Thus, we should delete:
-                    File zip = new File(zipFile);
-                    if(zip.exists()){
-                        zip.delete();
-                    }
-                    Utility.discardFeedbackFiles(element);
-                    updateSummaryJson(element,timeSent);
-                }
-                else{
-                    Log.i(Utility.LOG_TAG_NAME,"Failed to POST feedback data for the file " + element + ". HTTP response code: " + response.getStatus());
-                }
-
-            }
-            finally{
-
-                // we do this for testing, so unit test code can deterministically stop waiting, and don't have to Thread.sleep
-                synchronized(LogPersister.WAIT_LOCK) {
-                    LogPersister.WAIT_LOCK.notifyAll ();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
-
-            Log.i(Utility.LOG_TAG_NAME,"External network Access failed. Response: " +response + " JSONObject:" + extendedInfo + " Throwable: " + t );
-
-            // we do this for testing, so unit test code can deterministically stop waiting, and don't have to Thread.sleep
-            synchronized(LogPersister.WAIT_LOCK) {
-                LogPersister.WAIT_LOCK.notifyAll ();
             }
         }
     }

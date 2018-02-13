@@ -245,7 +245,6 @@ public class ReviewPopup extends Activity {
     }
 
     public void closeActivity(View v) {
-        //new DismissAppFeedBack(this).show();
         new DismissAppFeedBack(this, "ALL", true).show();
     }
 
