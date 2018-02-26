@@ -161,6 +161,8 @@ public class BMSAnalytics {
         BaseRequest.registerInterceptor(new NetworkLoggingInterceptor());
 
         enable();
+
+        MFPInAppFeedBackListner.sendAppFeedback();
     }
 
     /**

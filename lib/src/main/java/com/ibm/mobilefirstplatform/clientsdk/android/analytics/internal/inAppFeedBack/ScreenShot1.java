@@ -7,8 +7,8 @@ import android.view.View;
  * Created by mohlogan on 27/12/17.
  */
 
-public class ScreenShot {
-    public static Bitmap takeScreenShot(View v){
+public class ScreenShot1 {
+    public static Bitmap takeScreenShot1(View v){
         v.setDrawingCacheEnabled(true);
         v.buildDrawingCache(true);
         Bitmap b = Bitmap.createBitmap(v.getDrawingCache());
@@ -16,7 +16,7 @@ public class ScreenShot {
         return b;
     }
 
-    public static Bitmap takeScreenShotOfRootView(View v){
-        return takeScreenShot(v.getRootView().getRootView());
+    public static Bitmap takeScreenShotOfRootView1(View v){
+        return takeScreenShot1(v.getRootView().getRootView());
     }
 }

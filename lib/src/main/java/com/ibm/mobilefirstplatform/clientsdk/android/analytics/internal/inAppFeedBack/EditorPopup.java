@@ -138,10 +138,18 @@ public class EditorPopup extends Activity{
                 //Save file only if something edited on image
                 if(isEdited){
                     saveImageAndComment();
+                    new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
                 }else{
-                    Utility.discardFeedbackFiles(instanceName);
+                    String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+                    if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
+                        new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
+                    }else {
+                        Utility.discardFeedbackFiles(instanceName);
+                        Intent intent = new Intent(EditorPopup.this, ReviewPopup.class);
+                        intent.putExtra("imagename", instanceName);
+                        EditorPopup.this.startActivityForResult(intent, 200);
+                    }
                 }
-                new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
             }
         });
 
@@ -335,7 +343,7 @@ public class EditorPopup extends Activity{
         if(isEdited){
             saveImageAndComment();
         }
-        new DismissAppFeedBack(this, instanceName, isEdited).show();
+        new DismissButtonAction(this, instanceName, isEdited).show();
     }
 
     @Override

@@ -1,8 +1,5 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.util.Log;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
@@ -19,43 +16,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-
 /**
- * Created by rott on 2/17/16.
+ * Created by mohlogan on 25/02/18.
  */
-public class SubmitAppFeedBack extends AlertDialog {
 
-
-    public SubmitAppFeedBack(Activity activity) {
-        super(activity);
-
-        sendLogsToServer();
-        this.setTitle("App Feedback Sent");
-        this.setMessage("Thanks for the feedback, you make our app better!");
-        this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new PositiveButtonClick(activity));
-    }
-
-    /**
-     * Clicking "OK, GOT IT"
-     */
-    private static class PositiveButtonClick implements OnClickListener {
-        private Activity activity;
-
-        public PositiveButtonClick(Activity activity) {
-            this.activity = activity;
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            activity.setResult(200,null);
-            activity.finish();
-        }
-    }
+public class SendAppFeedback {
 
     /**
      * Send Logs to Server
      */
-    private static void sendLogsToServer(){
+    protected static void sendLogsToServer(boolean setSentTime){
         long timeSent = new Date().getTime();
         String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
         if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") ) {
@@ -70,8 +40,10 @@ public class SubmitAppFeedBack extends AlertDialog {
                 for (int i = 0; i < savedArray.length(); i++) {
                     String instanceName = (String) savedArray.get(i);
                     String screenFeedBackJsonFile = Utility.getJSONfileName(instanceName);
-                    String actualTimeSent = Utility.addAndFetchSentTimeFromScreenFeedBackJson(screenFeedBackJsonFile, timeSent);
-                    timeSentMap.put(instanceName,actualTimeSent);
+                    String actualTimeSent = Utility.addAndFetchSentTimeFromScreenFeedBackJson(screenFeedBackJsonFile, timeSent, setSentTime);
+                    if(actualTimeSent != null){
+                        timeSentMap.put(instanceName,actualTimeSent);
+                    }
                 }
 
                 //Iterate each feedback element which is not yet sent
@@ -146,5 +118,4 @@ public class SubmitAppFeedBack extends AlertDialog {
             }
         }
     }
-
 }

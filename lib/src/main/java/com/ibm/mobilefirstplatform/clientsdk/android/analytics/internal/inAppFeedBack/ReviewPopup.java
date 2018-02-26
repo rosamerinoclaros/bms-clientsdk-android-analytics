@@ -14,7 +14,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.R;
 
@@ -191,7 +190,7 @@ public class ReviewPopup extends Activity {
             public void onClick(View v) {
 
                 //Utility.deleteAllFiles();
-                new SubmitAppFeedBack(ReviewPopup.this).show();
+                new SendButtonAction(ReviewPopup.this).show();
             }
         });
     }
@@ -212,9 +211,9 @@ public class ReviewPopup extends Activity {
         Utility.loadImageFromLocalStore(this, Utility.getImageFileName(instanceName), imageView);
 
         //for (int i=0; i < 2; i++){
-            Toast toast = Toast.makeText(this, "Scroll Down To View the Comments", Toast.LENGTH_LONG);
+            /*Toast toast = Toast.makeText(this, "Scroll Down To View the Comments", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP|Gravity.CENTER, 3, 10);
-            toast.show();
+            toast.show();*/
         //}
 
         linearLayout.addView(imageView);
@@ -242,7 +241,9 @@ public class ReviewPopup extends Activity {
     }
 
     public void closeActivity(View v) {
-        new DismissAppFeedBack(this, "ALL", true).show();
+        //new DismissButtonAction(this, "ALL", true).show();
+        //exit the review move
+        finish();
     }
 
     private View drawLine(){

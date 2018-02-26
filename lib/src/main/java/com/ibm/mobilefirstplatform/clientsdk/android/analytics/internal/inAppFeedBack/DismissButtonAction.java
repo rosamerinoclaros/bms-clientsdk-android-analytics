@@ -8,7 +8,7 @@ import android.content.DialogInterface;
 /**
  * Created by rott on 2/17/16.
  */
-public class DismissAppFeedBack extends AlertDialog {
+public class DismissButtonAction extends AlertDialog {
 
     /**
      * Clicking "YES,DISMISS"
@@ -66,7 +66,7 @@ public class DismissAppFeedBack extends AlertDialog {
         }
     }
 
-    public DismissAppFeedBack(Activity activity, String filename, boolean isEdited) {
+    public DismissButtonAction(Activity activity, String filename, boolean isEdited) {
         super(activity);
 
         if(isEdited){

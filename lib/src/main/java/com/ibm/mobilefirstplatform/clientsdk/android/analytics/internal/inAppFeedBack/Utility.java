@@ -357,8 +357,7 @@ public class Utility {
             int BUFFER = 512;
             BufferedInputStream origin = null;
             FileOutputStream dest = new FileOutputStream(zipFile);
-            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(
-                    dest));
+            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             byte data[] = new byte[BUFFER];
 
             for (String filename : fileList) {
@@ -383,7 +382,7 @@ public class Utility {
         }
     }
 
-    protected static String addAndFetchSentTimeFromScreenFeedBackJson(String jsonFile, long timeSent){
+    protected static String addAndFetchSentTimeFromScreenFeedBackJson(String jsonFile, long timeSent, boolean setSentTime){
         String screenFeedBackJsonString = Utility.convertFileToString(jsonFile);
         String actualTimeSent = null;
         try{
@@ -395,7 +394,7 @@ public class Utility {
             }
 
             //Add timeSent only if not set previously
-            if(actualTimeSent==null || actualTimeSent.equals("")) {
+            if(setSentTime && (actualTimeSent==null || actualTimeSent.equals(""))) {
                 actualTimeSent = ""+timeSent;
                 screenFeedBackJson.put("timeSent", actualTimeSent);
                 Utility.addDataToFile(jsonFile, screenFeedBackJson.toString(), false);

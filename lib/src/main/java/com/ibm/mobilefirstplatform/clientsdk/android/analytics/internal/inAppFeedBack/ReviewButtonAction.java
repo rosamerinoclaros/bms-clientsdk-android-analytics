@@ -129,13 +129,16 @@ public class ReviewButtonAction extends AlertDialog{
                 this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity,filename));
                 this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
             } else {
-                alertReasonString = "No Comments. \n Do you want to review other feedback's?";
+                Intent intent = new Intent(activity, com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.ReviewPopup.class);
+                intent.putExtra("imagename", filename);
+                activity.startActivityForResult(intent, 200);
+                /*alertReasonString = "No Comments. \n Do you want to review other feedback's?";
                 optionString2 = "YES, REVIEW";
                 optionString3 = "NO, CANCEL";
 
                 this.setMessage(alertReasonString);
                 this.setButton(AlertDialog.BUTTON_NEUTRAL, optionString2, new Option2(activity, filename));
-                this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));
+                this.setButton(AlertDialog.BUTTON_NEGATIVE, optionString3, new Option3(activity));*/
             }
         }
     }
