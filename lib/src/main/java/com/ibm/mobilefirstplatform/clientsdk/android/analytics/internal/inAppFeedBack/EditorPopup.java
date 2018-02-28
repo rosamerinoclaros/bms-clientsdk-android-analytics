@@ -305,10 +305,10 @@ public class EditorPopup extends Activity{
                 screenFeedBackJSON.put("id", id);
                 //screenFeedBackJSON.put("timeSent", null);
                 screenFeedBackJSON.put("comments", commentJSON);
-                screenFeedBackJSON.put("image", instanceName);
-                screenFeedBackJSON.put("imageWidth", imageWidth);
-                screenFeedBackJSON.put("imageHeight", imageHeight);
-                screenFeedBackJSON.put("sessionId", MFPAnalyticsActivityLifecycleListener.getAppSessionID());
+                screenFeedBackJSON.put("screenName", instanceName);
+                screenFeedBackJSON.put("screenWidth", imageWidth);
+                screenFeedBackJSON.put("screenHeight", imageHeight);
+                screenFeedBackJSON.put("sessionID", MFPAnalyticsActivityLifecycleListener.getAppSessionID());
                 screenFeedBackJSON.put("username", MFPInAppFeedBackListner.getUserIdentity());
             } catch (JSONException e) {
                 //No chance of getting here
