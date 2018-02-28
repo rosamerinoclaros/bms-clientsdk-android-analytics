@@ -3,7 +3,12 @@ package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFe
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
@@ -30,9 +35,18 @@ public class SendButtonAction extends AlertDialog {
         super(activity);
 
         SendAppFeedback.sendLogsToServer(true);
-        this.setTitle("App Feedback Sent");
-        this.setMessage("Thanks for the feedback, you make our app better!");
-        this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new PositiveButtonClick(activity));
+
+        Toast toast = Toast.makeText(activity, "Thanks for the feedback, you make our app better!", Toast.LENGTH_LONG);
+        ViewGroup group = (ViewGroup) toast.getView();
+        TextView messageTextView = (TextView) group.getChildAt(0);
+        messageTextView.setTextSize(25);
+        messageTextView.setTextColor(Color.BLUE);
+        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER, 0, 0);
+        toast.show();
+
+        //this.setTitle("App Feedback Sent");
+        //this.setMessage("Thanks for the feedback, you make our app better!");
+        //this.setButton(AlertDialog.BUTTON_POSITIVE, "OK,GOT IT", new PositiveButtonClick(activity));
     }
 
     /**

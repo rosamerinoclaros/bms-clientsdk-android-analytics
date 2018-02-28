@@ -22,10 +22,12 @@ public class MFPInAppFeedBackListner {
     private static MFPInAppFeedBackListner instance = null;
     private static Context applicationContext = null;
     private static Activity currentActivity = null;
+    protected static boolean multiscreen = false;
 
     private static final int REQUEST= 112;
 
     private static Context context = null;
+    private static String userIdentity = "undefined";
 
     public static void setContext(Context context){
         if(null == MFPInAppFeedBackListner.context) {
@@ -34,11 +36,20 @@ public class MFPInAppFeedBackListner {
         }
     }
 
+    public static void setUserIdentity(String userIdentity){
+        userIdentity = userIdentity;
+    }
+
+    protected static String getUserIdentity(){
+        return userIdentity;
+    }
+
     public static Context getContext(){
         return MFPInAppFeedBackListner.context;
     }
 
     public static void triggerFeedbackMode(final Activity activity){
+
         if(null != MFPInAppFeedBackListner.context) {
             currentActivity = activity;
             callFeedbackEditScreenActivity();
@@ -78,6 +89,8 @@ public class MFPInAppFeedBackListner {
 
         Intent intent = new Intent(currentActivity, EditorPopup.class);
         intent.putExtra("imagename", filename);
+        intent.putExtra("imageWidth", image.getWidth());
+        intent.putExtra("imageHeight", image.getHeight());
         currentActivity.startActivity(intent);
     }
 

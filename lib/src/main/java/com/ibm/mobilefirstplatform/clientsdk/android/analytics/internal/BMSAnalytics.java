@@ -309,6 +309,7 @@ public class BMSAnalytics {
             logger.debug("JSONException encountered logging change in user context: " + e.getMessage());
         }
 
+        MFPInAppFeedBackListner.setUserIdentity(hashedUserID);
         log(metadata);
     }
 

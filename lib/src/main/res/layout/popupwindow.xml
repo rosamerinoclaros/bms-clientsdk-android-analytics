@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#47525E"
-            android:text="Review"
+            android:text="Send"
             android:textColor="#FFFFFF"
             android:layout_alignParentRight="true"
             />

@@ -1,7 +1,9 @@
 package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,9 +11,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -19,8 +23,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.R;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.BMSAnalytics;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +64,8 @@ public class EditorPopup extends Activity{
     private boolean fileSaved;
     private int count;
     private String instanceName;
+    private int imageWidth;
+    private int imageHeight;
     private List<String> commentList;
     private boolean isEdited;
 
@@ -99,6 +108,8 @@ public class EditorPopup extends Activity{
 
         Bundle extras = getIntent().getExtras();
         instanceName = extras.getString("imagename");
+        imageWidth = extras.getInt("imageWidth");
+        imageHeight = extras.getInt("imageHeight");
         loadImageFromLocalStore(Utility.getImageFileName(instanceName));
 
         paintDraw = new Paint();
@@ -130,24 +141,59 @@ public class EditorPopup extends Activity{
         });
 
         reviewButton = (Button) findViewById(R.id.reviewButton);
+        if(MFPInAppFeedBackListner.multiscreen) {
+           reviewButton.setText("Review");
+        }else{
+            reviewButton.setText("Send");
+        }
         //reviewButton.setEnabled(false);
         //reviewButton.setBackgroundColor(Color.parseColor("#E0E0E0"));
         reviewButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //Save file only if something edited on image
-                if(isEdited){
-                    saveImageAndComment();
-                    new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
-                }else{
-                    String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
-                    if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
+
+                if(!MFPInAppFeedBackListner.multiscreen) {
+                    if (isEdited) {
+                        saveImageAndComment();
+                        //new SendButtonAction(EditorPopup.this).show();
+                        sendAppFeedback();
+                    } else {
+                        //Stay or Dissmiss
+                        AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
+                        alertDialog.setTitle("Send Feedback");
+                        alertDialog.setMessage("Nothing to send, since no comments added. Do you want to exit?");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No, Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes, Exit",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Utility.discardFeedbackFiles(instanceName);
+                                        EditorPopup.this.finish();
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.setCancelable(false);
+                        alertDialog.show();
+                    }
+                }else {
+                    //Save file only if something edited on image
+                    if(isEdited){
+                        saveImageAndComment();
                         new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
-                    }else {
-                        Utility.discardFeedbackFiles(instanceName);
-                        Intent intent = new Intent(EditorPopup.this, ReviewPopup.class);
-                        intent.putExtra("imagename", instanceName);
-                        EditorPopup.this.startActivityForResult(intent, 200);
+                    }else{
+                        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
+                        if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
+                            new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
+                        }else {
+                            Utility.discardFeedbackFiles(instanceName);
+                            Intent intent = new Intent(EditorPopup.this, ReviewPopup.class);
+                            intent.putExtra("imagename", instanceName);
+                            EditorPopup.this.startActivityForResult(intent, 200);
+                        }
                     }
                 }
             }
@@ -260,6 +306,10 @@ public class EditorPopup extends Activity{
                 //screenFeedBackJSON.put("timeSent", null);
                 screenFeedBackJSON.put("comments", commentJSON);
                 screenFeedBackJSON.put("image", instanceName);
+                screenFeedBackJSON.put("imageWidth", imageWidth);
+                screenFeedBackJSON.put("imageHeight", imageHeight);
+                screenFeedBackJSON.put("sessionId", MFPAnalyticsActivityLifecycleListener.getAppSessionID());
+                screenFeedBackJSON.put("username", MFPInAppFeedBackListner.getUserIdentity());
             } catch (JSONException e) {
                 //No chance of getting here
             }
@@ -340,10 +390,54 @@ public class EditorPopup extends Activity{
     }
 
     public void closeActivity(View v) {
-        if(isEdited){
-            saveImageAndComment();
+        if(MFPInAppFeedBackListner.multiscreen){
+            if(isEdited) {
+                saveImageAndComment();
+            }
+            new DismissButtonAction(this, instanceName, isEdited).show();
+        }else{
+            if(isEdited){
+                saveImageAndComment();
+                AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
+                alertDialog.setTitle("Close Feedback");
+                alertDialog.setMessage("Do you want to Send or Discard the Feedback before exit?");
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Discard",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Utility.discardFeedbackFiles(instanceName);
+                                EditorPopup.this.finish();
+                            }
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Send",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendAppFeedback();
+                            }
+                        });
+                alertDialog.setCancelable(false);
+                alertDialog.show();
+            }else{
+                /*AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage("Do you want to Exit?");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No, Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes, Exit",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Utility.discardFeedbackFiles(instanceName);
+                                EditorPopup.this.finish();
+                            }
+                        });
+                alertDialog.show();*/
+                Utility.discardFeedbackFiles(instanceName);
+                EditorPopup.this.finish();
+            }
         }
-        new DismissButtonAction(this, instanceName, isEdited).show();
     }
 
     @Override
@@ -352,5 +446,19 @@ public class EditorPopup extends Activity{
         if(requestCode==200) {
             finish();
         }
+    }
+
+    private void sendAppFeedback(){
+        SendAppFeedback.sendLogsToServer(true);
+        finish();
+
+        Toast toast = Toast.makeText(getApplicationContext(), "THANK YOU FOR YOUR FEEDBACK!", Toast.LENGTH_LONG);
+        ViewGroup group = (ViewGroup) toast.getView();
+        TextView messageTextView = (TextView) group.getChildAt(0);
+        messageTextView.setTextSize(20);
+        messageTextView.setTextColor(Color.BLACK);
+        group.setBackgroundColor(Color.WHITE);
+        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER, 0, 0);
+        toast.show();
     }
 }
