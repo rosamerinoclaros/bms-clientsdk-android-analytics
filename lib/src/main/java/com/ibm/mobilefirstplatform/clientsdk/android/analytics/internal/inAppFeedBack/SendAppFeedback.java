@@ -16,10 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by mohlogan on 25/02/18.
- */
-
 public class SendAppFeedback {
 
     /**

@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.R;
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.BMSAnalytics;
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.MFPAnalyticsActivityLifecycleListener;
 
 import org.json.JSONArray;
@@ -36,16 +35,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by mohlogan on 27/12/17.
- */
-public class EditorPopup extends Activity{
+public class EditFeedback extends Activity{
 
     private ImageView imageView;
     private ImageButton drawButton;
     private ImageButton eraseButton;
     private ImageButton commentButton;
-    private Button reviewButton;
+    private Button sendButton;
     private EditText editText;
     private TextView commentTextLable;
     private View editGroup;
@@ -60,7 +56,7 @@ public class EditorPopup extends Activity{
     private boolean drawToggle;
     private boolean eraseToggle;
     private boolean commentToggle;
-    private boolean allowComment;
+    private boolean allowClick;
     private boolean fileSaved;
     private int count;
     private String instanceName;
@@ -72,7 +68,7 @@ public class EditorPopup extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.popupwindow);
+        setContentView(R.layout.edit_feedback);
 
         count = 0;
         commentList = new ArrayList<>();
@@ -82,7 +78,7 @@ public class EditorPopup extends Activity{
         drawToggle=false;
         eraseToggle=false;
         commentToggle=false;
-        allowComment=true;
+        allowClick =true;
 
         imageView = (ImageView) findViewById(R.id.imageView);
         drawButton = (ImageButton) findViewById(R.id.drawButton);
@@ -132,7 +128,7 @@ public class EditorPopup extends Activity{
                     String comment = editText.getText().toString();
                     commentList.add(comment);
 
-                    allowComment=true;
+                    allowClick =true;
                     editGroup.setVisibility(View.GONE);
                     handled = true;
                 }
@@ -140,62 +136,39 @@ public class EditorPopup extends Activity{
             }
         });
 
-        reviewButton = (Button) findViewById(R.id.reviewButton);
-        if(MFPInAppFeedBackListner.multiscreen) {
-           reviewButton.setText("Review");
-        }else{
-            reviewButton.setText("Send");
-        }
-        //reviewButton.setEnabled(false);
-        //reviewButton.setBackgroundColor(Color.parseColor("#E0E0E0"));
-        reviewButton.setOnClickListener(new View.OnClickListener(){
+        sendButton = (Button) findViewById(R.id.sendButton);
+        sendButton.setText("Send");
+
+        sendButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-
-                if(!MFPInAppFeedBackListner.multiscreen) {
-                    if (isEdited) {
-                        saveImageAndComment();
-                        //new SendButtonAction(EditorPopup.this).show();
-                        sendAppFeedback();
-                    } else {
-                        //Stay or Dissmiss
-                        AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
-                        alertDialog.setTitle("Send Feedback");
-                        alertDialog.setMessage("Nothing to send, since no comments added. Do you want to exit?");
-                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No, Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes, Exit",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Utility.discardFeedbackFiles(instanceName);
-                                        EditorPopup.this.finish();
-                                        dialog.dismiss();
-                                    }
-                                });
-                        alertDialog.setCancelable(false);
-                        alertDialog.show();
-                    }
-                }else {
-                    //Save file only if something edited on image
-                    if(isEdited){
-                        saveImageAndComment();
-                        new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
-                    }else{
-                        String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
-                        if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || appFeedBackSummary.contains("\"saved\":[]") ) {
-                            new ReviewButtonAction(EditorPopup.this, instanceName, isEdited).show();
-                        }else {
-                            Utility.discardFeedbackFiles(instanceName);
-                            Intent intent = new Intent(EditorPopup.this, ReviewPopup.class);
-                            intent.putExtra("imagename", instanceName);
-                            EditorPopup.this.startActivityForResult(intent, 200);
-                        }
-                    }
+            if(allowClick) {
+                if (isEdited) {
+                    saveImageAndComment();
+                    sendAppFeedback();
+                } else {
+                    //Stay or Dissmiss
+                    AlertDialog alertDialog = new AlertDialog.Builder(EditFeedback.this).create();
+                    alertDialog.setTitle("Send Feedback");
+                    alertDialog.setMessage("Nothing to send, since no comments added. Do you want to exit?");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No, Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes, Exit",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Utility.discardFeedbackFiles(instanceName);
+                                    EditFeedback.this.finish();
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.setCancelable(false);
+                    alertDialog.show();
                 }
+            }
             }
         });
 
@@ -203,7 +176,7 @@ public class EditorPopup extends Activity{
             @Override
             public void onClick(View arg0) {
                 //Change the icon
-                if(!drawToggle){
+                if(!drawToggle && allowClick){
                     drawButton.setImageResource(R.drawable.draw_yellow);
                     drawToggle=true;
                     eraseButton.setImageResource(R.drawable.erase_black);
@@ -221,7 +194,7 @@ public class EditorPopup extends Activity{
             @Override
             public void onClick(View arg0) {
                 //Change the icon
-                if(!eraseToggle){
+                if(!eraseToggle && allowClick){
                     eraseButton.setImageResource(R.drawable.erase_yellow);
                     eraseToggle=true;
                     drawButton.setImageResource(R.drawable.draw_black);
@@ -239,7 +212,7 @@ public class EditorPopup extends Activity{
             @Override
             public void onClick(View arg0) {
                 //Change the icon
-                if(!commentToggle){
+                if(!commentToggle && allowClick){
                     commentButton.setImageResource(R.drawable.comment_yellow);
                     commentToggle=true;
                     drawButton.setImageResource(R.drawable.draw_black);
@@ -247,8 +220,10 @@ public class EditorPopup extends Activity{
                     eraseButton.setImageResource(R.drawable.erase_black);
                     eraseToggle=false;
                 }else{
-                    commentButton.setImageResource(R.drawable.comment_black);
-                    commentToggle=false;
+                    if(allowClick){
+                        commentButton.setImageResource(R.drawable.comment_black);
+                        commentToggle=false;
+                    }
                 }
             }
         });
@@ -332,8 +307,8 @@ public class EditorPopup extends Activity{
                 //
             }
 
-            System.out.println(jsonFileName +":"+ screenFeedBackJSON.toString());
-            System.out.println("AppFeedBackSummary.json:" + appFeedBacksummaryJSON.toString());
+            //System.out.println(jsonFileName +":"+ screenFeedBackJSON.toString());
+            //System.out.println("AppFeedBackSummary.json:" + appFeedBacksummaryJSON.toString());
             Utility.addDataToFile(jsonFileName, screenFeedBackJSON.toString(), false);
             Utility.addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(), false);
             fileSaved=true;
@@ -350,19 +325,22 @@ public class EditorPopup extends Activity{
             float ratioWidth = (float)bm.getWidth()/(float)iv.getWidth();
             float ratioHeight = (float)bm.getHeight()/(float)iv.getHeight();
 
-            if(commentToggle && allowComment){
-                allowComment=false;
+            if(commentToggle && allowClick){
+                allowClick =false;
 
                 Paint pCircle = new Paint();
                 pCircle.setColor(Color.parseColor("#FF9052"));
                 canvasMaster.drawCircle(x * ratioWidth, y * ratioHeight,  Utility.dipToPixels(getApplicationContext(),20), pCircle);
 
+                int textSize = (int)Utility.dipToPixels(getApplicationContext(),20);
+                int dp4 = (int)Utility.dipToPixels(getApplicationContext(),4);
+
                 count +=1;
                 String drawText = ""+(count);
                 Paint paint = new Paint();
                 paint.setColor(Color.BLACK);
-                paint.setTextSize(Utility.dipToPixels(getApplicationContext(),20));
-                canvasMaster.drawText(drawText, x * ratioWidth, y * ratioHeight, paint);
+                paint.setTextSize(textSize);
+                canvasMaster.drawText(drawText, x * ratioWidth-dp4, y * ratioHeight+dp4, paint);
 
                 //Enable edittext
                 commentTextLable.setText("Comment #"+count);
@@ -377,8 +355,6 @@ public class EditorPopup extends Activity{
                         ((eraseToggle)? paintBlur: paintDraw));
             }
             imageView.invalidate();
-            //reviewButton.setEnabled(true);
-            //reviewButton.setBackgroundColor(Color.parseColor("#47525E"));
         }
     }
 
@@ -390,22 +366,17 @@ public class EditorPopup extends Activity{
     }
 
     public void closeActivity(View v) {
-        if(MFPInAppFeedBackListner.multiscreen){
-            if(isEdited) {
-                saveImageAndComment();
-            }
-            new DismissButtonAction(this, instanceName, isEdited).show();
-        }else{
+        if(allowClick){
             if(isEdited){
                 saveImageAndComment();
-                AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(EditFeedback.this).create();
                 alertDialog.setTitle("Close Feedback");
                 alertDialog.setMessage("Do you want to Send or Discard the Feedback before exit?");
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Discard",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Utility.discardFeedbackFiles(instanceName);
-                                EditorPopup.this.finish();
+                                EditFeedback.this.finish();
                             }
                         });
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Send",
@@ -417,25 +388,8 @@ public class EditorPopup extends Activity{
                 alertDialog.setCancelable(false);
                 alertDialog.show();
             }else{
-                /*AlertDialog alertDialog = new AlertDialog.Builder(EditorPopup.this).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage("Do you want to Exit?");
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No, Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes, Exit",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Utility.discardFeedbackFiles(instanceName);
-                                EditorPopup.this.finish();
-                            }
-                        });
-                alertDialog.show();*/
                 Utility.discardFeedbackFiles(instanceName);
-                EditorPopup.this.finish();
+                EditFeedback.this.finish();
             }
         }
     }
@@ -452,7 +406,7 @@ public class EditorPopup extends Activity{
         SendAppFeedback.sendLogsToServer(true);
         finish();
 
-        Toast toast = Toast.makeText(getApplicationContext(), "THANK YOU FOR YOUR FEEDBACK!", Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(getApplicationContext(), "THANK YOU FOR THE FEEDBACK!", Toast.LENGTH_LONG);
         ViewGroup group = (ViewGroup) toast.getView();
         TextView messageTextView = (TextView) group.getChildAt(0);
         messageTextView.setTextSize(20);

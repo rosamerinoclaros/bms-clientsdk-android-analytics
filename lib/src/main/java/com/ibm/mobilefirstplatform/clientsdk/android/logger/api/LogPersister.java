@@ -1031,13 +1031,10 @@ public final class LogPersister {
 
         feedbackUploaderURL = appRoute + FEEDBACK_UPLOADER_PATH;
 
-        System.out.println("feedbackUploaderURL: "+feedbackUploaderURL);
         LogPersister.SendLogsRequestListener requestListener = new LogPersister.SendLogsRequestListener(fileToSend, listener, false, feedbackUploaderURL);
 
         Request sendLogsRequest = new Request(feedbackUploaderURL, Request.POST);
 
-        //sendLogsRequest.addHeader("Content-Type", BaseRequest.BINARY_CONTENT_TYPE);
-        //sendLogsRequest.addHeader("Content-Type", "application/zip");
         sendLogsRequest.addHeader("Content-Type", "multipart/form-data");
 
         if (BMSAnalytics.getClientApiKey() != null && !BMSAnalytics.getClientApiKey().equalsIgnoreCase("")) {

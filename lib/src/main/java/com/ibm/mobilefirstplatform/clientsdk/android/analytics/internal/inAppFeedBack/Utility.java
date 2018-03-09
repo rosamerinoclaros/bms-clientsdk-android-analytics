@@ -41,10 +41,6 @@ import java.util.zip.ZipOutputStream;
 
 import okhttp3.internal.Util;
 
-/**
- * Created by mohlogan on 06/01/18.
- */
-
 public class Utility {
 
     protected static String storageDirectory = null;
@@ -96,33 +92,6 @@ public class Utility {
         return canvasMaster;
     }
 
-    protected static void loadImageFromLocalStore(Context applicationContext, String filename, ImageView imageView) {
-        try {
-            Uri uri = Uri.parse("file://" + Utility.storageDirectory + filename);
-            Bitmap tempBitmap = BitmapFactory.decodeStream(applicationContext.getContentResolver().openInputStream(uri));
-
-            Bitmap.Config config;
-            if(tempBitmap.getConfig() != null){
-                config = tempBitmap.getConfig();
-            }else{
-                config = Bitmap.Config.ARGB_8888;
-            }
-
-            //bitmapMaster is Mutable bitmap
-            Bitmap bitmapMaster = Bitmap.createBitmap(
-                    tempBitmap.getWidth(),
-                    tempBitmap.getHeight(),
-                    config);
-
-            Canvas canvasMaster = new Canvas(bitmapMaster);
-            canvasMaster.drawBitmap(tempBitmap, 0, 0, null);
-
-            imageView.setImageBitmap(bitmapMaster);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     protected static void saveIamgeToLocalStore(Bitmap finalBitmap, String fileName) {
         File myDir = new File(Utility.storageDirectory);
         myDir.mkdirs();
@@ -141,56 +110,6 @@ public class Utility {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Return image list which yet to be reviewed. i.e ScreenFeedBack.json doesnt have timeSent set.
-     * @return
-     */
-    protected static List<String> getCurrentImageSetForReview(){
-        List<String> list = new ArrayList<>();
-
-        String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
-        if ( !appFeedBackSummary.equals("") && !appFeedBackSummary.equals("{}") ) {
-            try {
-                JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
-                JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
-
-                for (int i = 0; i < savedArray.length(); i++) {
-                    String element = (String) savedArray.get(i);
-                    String screenFeedBackJsonFile = getJSONfileName(element);
-                    JSONObject screenFeedBackJson = new JSONObject(Utility.convertFileToString(screenFeedBackJsonFile));
-                    try{
-                        screenFeedBackJson.get("timeSent");
-                    }catch (Exception je1) {
-                        list.add(element);
-                    }
-                }
-            } catch (Exception je) {
-                //
-            }
-        }
-        return list;
-    }
-
-    protected static List<String> fetchCommentsFromJSONFile(String jsonFile) {
-
-        List<String> list = new ArrayList<>();
-        String jsonString = convertFileToString(jsonFile);
-
-        if(!jsonString.equals("")){
-            try {
-                JSONObject obj = new JSONObject(jsonString);
-                JSONArray commentArray = (JSONArray) obj.get("comments");
-                for(int i = 0; i < commentArray.length(); i++) {
-                    list.add((String)commentArray.get(i));
-                }
-            } catch (JSONException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        return list;
     }
 
     protected static String convertFileToString(String fileName) {
@@ -212,17 +131,11 @@ public class Utility {
             }
         }
 
-        Log.i(Utility.LOG_TAG_NAME, "convertFileToString: " + file.getName() + ":" +fileName + ":" + returnStr);
+        Log.d(Utility.LOG_TAG_NAME, "convertFileToString: " + file.getName() + ":" +fileName + ":" + returnStr);
         return returnStr;
     }
 
-
-    protected static String fetchCommentfileName(String instanceName){
-        return instanceName.replace(".png", ".txt");
-    }
-
     protected static String getJSONfileName(String instanceName){
-        //return instanceName.replace(".png", ".json");
         return instanceName+".json";
     }
 
@@ -231,7 +144,6 @@ public class Utility {
     }
 
     protected static String getTimeCreated(String instanceFileName){
-        //return instanceFileName.substring(instanceFileName.indexOf("_")+1, instanceFileName.lastIndexOf("."));
         return instanceFileName.substring(instanceFileName.indexOf("_")+1);
     }
 
@@ -254,35 +166,6 @@ public class Utility {
         }
     }
 
-    protected static void deleteAllFiles(){
-        String path = Utility.storageDirectory;
-
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-
-        System.out.println("Size: "+ files.length);
-        for (int i = 0; i < files.length; i++){
-            if(files[i].getName().endsWith(".png")){
-
-                //Delete Image file
-                if(files[i].exists()){
-                    if (!files[i].delete()) {
-                        Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + files[i].getPath());
-                    }
-                }
-
-                //Delete Comment File
-                String commentFileStr = Utility.fetchCommentfileName(files[i].getName());
-                File commentFile = new File(path+"/"+commentFileStr);
-                if(commentFile.exists()){
-                    if (!commentFile.delete()) {
-                        Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + commentFile.getPath());
-                    }
-                }
-            }
-        }
-    }
-
     protected static void discardFeedbackFiles(String filename) {
         String path = Utility.storageDirectory;
 
@@ -290,7 +173,7 @@ public class Utility {
         File file = new File(path, getImageFileName(filename));
         if (file.exists()) {
             if (!file.delete()) {
-                Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
+                Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
             }
         }
 
@@ -298,7 +181,7 @@ public class Utility {
         File jsonFile = new File(path, getJSONfileName(filename));
         if (jsonFile.exists()) {
             if (!jsonFile.delete()) {
-                Log.i(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
+                Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
             }
         }
 
@@ -334,21 +217,9 @@ public class Utility {
         return baseName+".png";
     }
 
-    protected static List removeItemFromList(List fileList, String fileEntryToRemove){
-        Iterator<String> iterator = fileList.iterator();
-        while (iterator.hasNext()) {
-            String filename = iterator.next();
-            if(filename.equals(fileEntryToRemove)){
-                iterator.remove();
-                break;
-            }
-        }
-        return fileList;
-    }
-
     protected static void setStorageLocation(Context context){
         Utility.storageDirectory = context.getFilesDir().getPath()+"/feedback/";
-        Log.i(Utility.LOG_TAG_NAME, "Utility.storageDirectory: "+Utility.storageDirectory);
+        Log.d(Utility.LOG_TAG_NAME, "Utility.storageDirectory: "+Utility.storageDirectory);
     }
 
 
@@ -362,7 +233,7 @@ public class Utility {
 
             for (String filename : fileList) {
                 filename = Utility.storageDirectory + filename;
-                Log.i(Utility.LOG_TAG_NAME, "Compress : Adding: " + filename);
+                Log.d(Utility.LOG_TAG_NAME, "Compress : Adding: " + filename);
                 FileInputStream fi = new FileInputStream(filename);
                 origin = new BufferedInputStream(fi, BUFFER);
 
@@ -425,7 +296,7 @@ public class Utility {
 
     protected synchronized static void updateSummaryJson(String sentElement, String timeSent) {
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
-        Log.i(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
+        Log.d(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
         if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}")) {
             return;
         } else {
@@ -453,7 +324,7 @@ public class Utility {
 
                 appFeedBacksummaryJSON.put("saved",savedArray);
                 appFeedBacksummaryJSON.put("send", sentObject);
-                Log.i(Utility.LOG_TAG_NAME, "appFeedBackSummary: " + appFeedBacksummaryJSON.toString());
+                Log.d(Utility.LOG_TAG_NAME, "appFeedBackSummary: " + appFeedBacksummaryJSON.toString());
                 Utility.addDataToFile(appFeedBackSummaryFile, appFeedBacksummaryJSON.toString(), false);
             }catch (JSONException je){
                 je.printStackTrace();
