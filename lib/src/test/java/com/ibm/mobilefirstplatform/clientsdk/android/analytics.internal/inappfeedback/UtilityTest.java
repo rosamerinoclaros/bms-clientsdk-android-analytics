@@ -6,17 +6,12 @@ import android.os.Build;
 import com.ibm.mobilefirstplatform.clientsdk.android.BuildConfig;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.io.File;
-
-import okhttp3.internal.Util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -69,7 +64,7 @@ public class UtilityTest {
         try{
             Utility.getDeviceID(activity);
         }catch(Exception e){
-            assertTrue(true);
+
         }
 
     }

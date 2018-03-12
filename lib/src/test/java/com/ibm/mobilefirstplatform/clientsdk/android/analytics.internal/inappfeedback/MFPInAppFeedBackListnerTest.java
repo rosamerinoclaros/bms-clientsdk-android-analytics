@@ -37,7 +37,7 @@ public class MFPInAppFeedBackListnerTest {
         try{
             MFPInAppFeedBackListner.triggerFeedbackMode(null);
         }catch(Exception e){
-            assertTrue(true);
+
         }
     }
 

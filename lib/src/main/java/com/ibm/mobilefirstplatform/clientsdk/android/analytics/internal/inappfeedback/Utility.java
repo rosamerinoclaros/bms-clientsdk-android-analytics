@@ -160,23 +160,19 @@ public class Utility {
 
         //Delete image file
         File file = new File(path, getImageFileName(filename));
-        if (file.exists()) {
-            if (!file.delete()) {
-                Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
-            }
+        if (file.exists() && !file.delete()) {
+            Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
         }
 
         //Delete Json file if exists
         File jsonFile = new File(path, getJSONfileName(filename));
-        if (jsonFile.exists()) {
-            if (!jsonFile.delete()) {
-                Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
-            }
+        if (jsonFile.exists() && !jsonFile.delete()) {
+            Log.e(Utility.LOG_TAG_NAME, "file could not be deleted :" + file.getPath());
         }
 
         //Delete entry from saved AppFeedBackSummary.json
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
-        if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") || !appFeedBackSummary.contains(filename)) {
+        if ("".equals(appFeedBackSummary) || "{}".equals(appFeedBackSummary) || !appFeedBackSummary.contains(filename)) {
             //Do Nothing
         } else {
             try {
@@ -196,10 +192,7 @@ public class Utility {
 
     protected static String generateUniqueFileName(String baseName){
         long now = new Date().getTime();
-        //String nowString = (String) android.text.format.DateFormat.format("yyyy_MM_dd_hhmmss", now);
-        //baseName +="_"+now+".png";
-        baseName +="_"+now;
-        return baseName;
+        return baseName+"_"+now;
     }
 
     protected static String getImageFileName(String baseName){
@@ -277,7 +270,7 @@ public class Utility {
                     output.put(element);
                 }
             } catch (JSONException e) {
-                throw new RuntimeException(e);
+
             }
         }
         return output;
@@ -286,7 +279,7 @@ public class Utility {
     protected synchronized static void updateSummaryJson(String sentElement, String timeSent) {
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
         Log.d(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
-        if (appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}")) {
+        if ("".equals(appFeedBackSummary) || "{}".equals(appFeedBackSummary)) {
             return;
         } else {
             try {
