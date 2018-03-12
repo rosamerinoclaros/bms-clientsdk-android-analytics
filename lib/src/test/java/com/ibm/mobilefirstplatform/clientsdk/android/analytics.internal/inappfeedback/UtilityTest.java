@@ -14,7 +14,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @Config(sdk = Build.VERSION_CODES.JELLY_BEAN_MR2, constants = BuildConfig.class)
 @RunWith(RobolectricTestRunner.class)
@@ -63,6 +63,7 @@ public class UtilityTest {
     public void testGetDeviceID() throws Exception{
         try{
             Utility.getDeviceID(activity);
+            fail();
         }catch(Exception e){
 
         }

@@ -172,9 +172,7 @@ public class Utility {
 
         //Delete entry from saved AppFeedBackSummary.json
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
-        if ("".equals(appFeedBackSummary) || "{}".equals(appFeedBackSummary) || !appFeedBackSummary.contains(filename)) {
-            //Do Nothing
-        } else {
+        if (!"".equals(appFeedBackSummary) && !"{}".equals(appFeedBackSummary) && appFeedBackSummary.contains(filename))) {
             try {
                 JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
                 JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
@@ -279,9 +277,7 @@ public class Utility {
     protected synchronized static void updateSummaryJson(String sentElement, String timeSent) {
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
         Log.d(Utility.LOG_TAG_NAME, "Entering updateSummaryJson: appFeedBackSummary: " + appFeedBackSummary);
-        if ("".equals(appFeedBackSummary) || "{}".equals(appFeedBackSummary)) {
-            return;
-        } else {
+        if (!"".equals(appFeedBackSummary) && !"{}".equals(appFeedBackSummary)) {
             try {
                 JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
                 JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
