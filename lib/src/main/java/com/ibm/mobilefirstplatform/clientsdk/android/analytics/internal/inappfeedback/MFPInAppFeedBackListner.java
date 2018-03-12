@@ -1,4 +1,4 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inappfeedback;
 
 import android.app.Activity;
 import android.content.Context;

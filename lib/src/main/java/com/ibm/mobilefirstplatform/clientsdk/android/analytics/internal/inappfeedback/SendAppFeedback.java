@@ -1,4 +1,4 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inappfeedback;
 
 import android.util.Log;
 
@@ -24,7 +24,7 @@ public class SendAppFeedback {
     protected static void sendLogsToServer(boolean setSentTime){
         long timeSent = new Date().getTime();
         String appFeedBackSummary = Utility.convertFileToString("AppFeedBackSummary.json");
-        if ( appFeedBackSummary.equals("") || appFeedBackSummary.equals("{}") ) {
+        if ( "".equals(appFeedBackSummary) || "{}".equals(appFeedBackSummary) ) {
             return;
         }else{
             try{

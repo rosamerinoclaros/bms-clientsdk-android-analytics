@@ -23,7 +23,7 @@ import com.ibm.mobilefirstplatform.clientsdk.android.core.internal.BaseRequest;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 import com.ibm.mobilefirstplatform.clientsdk.android.logger.internal.LogPersisterDelegate;
-import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack.MFPInAppFeedBackListner;
+import com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inappfeedback.MFPInAppFeedBackListner;
 
 import org.json.JSONException;
 import org.json.JSONObject;

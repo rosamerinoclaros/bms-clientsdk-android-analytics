@@ -1,4 +1,4 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inappfeedback;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -41,7 +41,6 @@ public class EditFeedback extends Activity{
     private ImageButton drawButton;
     private ImageButton eraseButton;
     private ImageButton commentButton;
-    private Button sendButton;
     private EditText editText;
     private TextView commentTextLable;
     private View editGroup;
@@ -69,6 +68,8 @@ public class EditFeedback extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_feedback);
+
+        Button sendButton;
 
         count = 0;
         commentList = new ArrayList<>();
@@ -251,6 +252,8 @@ public class EditFeedback extends Activity{
                         case MotionEvent.ACTION_UP:
                             if(!commentToggle) drawOnScreenshot((ImageView) v, bitmapMaster, prvX, prvY, x, y);
                             break;
+                        default:
+                            break;
                     }
                 }
                 return true;
@@ -289,12 +292,11 @@ public class EditFeedback extends Activity{
                 //No chance of getting here
             }
 
-
             //AppFeedBackSummary.json
             JSONObject appFeedBacksummaryJSON = new JSONObject();
             try{
                 String afbs = Utility.convertFileToString("AppFeedBackSummary.json");
-                if(!afbs.equals("")){
+                if(!"".equals(afbs)){
                     appFeedBacksummaryJSON = new JSONObject(afbs);
                     JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
                     savedArray.put(instanceName);
@@ -307,8 +309,6 @@ public class EditFeedback extends Activity{
                 //
             }
 
-            //System.out.println(jsonFileName +":"+ screenFeedBackJSON.toString());
-            //System.out.println("AppFeedBackSummary.json:" + appFeedBacksummaryJSON.toString());
             Utility.addDataToFile(jsonFileName, screenFeedBackJSON.toString(), false);
             Utility.addDataToFile("AppFeedBackSummary.json", appFeedBacksummaryJSON.toString(), false);
             fileSaved=true;

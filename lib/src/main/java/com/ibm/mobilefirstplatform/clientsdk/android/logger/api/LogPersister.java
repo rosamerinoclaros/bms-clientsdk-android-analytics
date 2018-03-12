@@ -40,8 +40,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 import java.util.WeakHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -1051,8 +1049,8 @@ public final class LogPersister {
 
     static class SendFeedBackProgressListner implements ProgressListener {
 
-        long numberOfOnProgressCalls = 1;
-        CountDownLatch countDown = null;
+        private long numberOfOnProgressCalls = 1;
+        private CountDownLatch countDown = null;
 
         public SendFeedBackProgressListner(long playloadLength){
             numberOfOnProgressCalls = playloadLength / 2048 + 1;

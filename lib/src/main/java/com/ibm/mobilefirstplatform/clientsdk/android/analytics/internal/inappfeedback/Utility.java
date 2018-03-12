@@ -1,21 +1,14 @@
-package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inAppFeedBack;
+package com.ibm.mobilefirstplatform.clientsdk.android.analytics.internal.inappfeedback;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.widget.ImageView;
-
-import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.LogPersister;
-import com.ibm.mobilefirstplatform.clientsdk.android.logger.api.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,15 +24,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import okhttp3.internal.Util;
 
 public class Utility {
 
