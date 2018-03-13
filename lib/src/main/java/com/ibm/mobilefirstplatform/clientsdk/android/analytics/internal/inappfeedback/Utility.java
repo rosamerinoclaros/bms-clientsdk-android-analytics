@@ -172,7 +172,7 @@ public class Utility {
 
         //Delete entry from saved AppFeedBackSummary.json
         String appFeedBackSummary = Utility.convertFileToString(appFeedBackSummaryFile);
-        if (!"".equals(appFeedBackSummary) && !"{}".equals(appFeedBackSummary) && appFeedBackSummary.contains(filename))) {
+        if (!"".equals(appFeedBackSummary) && !"{}".equals(appFeedBackSummary) && appFeedBackSummary.contains(filename)) {
             try {
                 JSONObject appFeedBacksummaryJSON = new JSONObject(appFeedBackSummary);
                 JSONArray savedArray = (JSONArray) appFeedBacksummaryJSON.get("saved");
