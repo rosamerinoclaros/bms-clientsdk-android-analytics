@@ -76,7 +76,7 @@
     <RelativeLayout
         android:id="@+id/textLayout"
         android:layout_width="match_parent"
-        android:layout_height="150sp"
+        android:layout_height="250sp"
         android:layout_above="@id/imageLayout"
         android:background="#FFFFFF"
         >
@@ -85,23 +85,23 @@
             android:id="@+id/comment_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:text="COMMENT"
             />
 
-        <android.support.design.widget.TextInputLayout
+        <EditText
+            android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:counterEnabled="true"
-            app:counterMaxLength="120">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLength="120"
-                android:inputType="text"
-                android:imeOptions="actionGo"
-                android:id="@+id/edit_text"
-                android:layout_below="@id/comment_text"
-                />
-        </android.support.design.widget.TextInputLayout>
+            android:hint="Add Your Feedback"
+            android:textColorHint="#B0BEC5"
+            android:inputType="text"
+            android:imeOptions="actionGo"
+            android:maxLength="120"
+            android:paddingLeft="8dp"
+            android:paddingRight="6dp"
+            android:layout_below="@id/comment_text"
+            android:textColor="@android:color/black" />
     </RelativeLayout>
 </RelativeLayout>
