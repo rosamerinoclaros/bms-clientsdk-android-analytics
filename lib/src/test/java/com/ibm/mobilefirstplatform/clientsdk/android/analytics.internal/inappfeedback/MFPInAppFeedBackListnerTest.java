@@ -34,12 +34,7 @@ public class MFPInAppFeedBackListnerTest {
 
     @Test
     public void testTriggerFeedbackMode() throws Exception{
-        try{
-            MFPInAppFeedBackListner.triggerFeedbackMode(null);
-            fail();
-        }catch(Exception e){
-
-        }
+        MFPInAppFeedBackListner.triggerFeedbackMode(null);
     }
 
 }

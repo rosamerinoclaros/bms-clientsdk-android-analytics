@@ -148,15 +148,34 @@ public class EditFeedback extends Activity{
         });
 
         editText.addTextChangedListener(new TextWatcher(){
+            /**
+             * Intentionally method not implemented since nothing to implement
+             * @param s
+             * @param start
+             * @param before
+             * @param count
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count){
+                //Nothing to implement
             }
 
+            /**
+             * Intentionally method not implemented since nothing to implement
+             * @param s
+             * @param start
+             * @param count
+             * @param aft
+             */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int aft){
-
+                //Nothing to implement
             }
 
+            /**
+             * Method adds character count
+             * @param s
+             */
             @Override
             public void afterTextChanged(Editable s){
                 commentTextLable.setText("COMMENT #"+count + " : [ " + (120 - s.toString().length()) + "/120 ]" );
