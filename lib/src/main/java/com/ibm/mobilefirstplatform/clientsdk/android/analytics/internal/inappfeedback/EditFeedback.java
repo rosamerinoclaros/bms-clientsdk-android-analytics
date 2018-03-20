@@ -47,6 +47,7 @@ public class EditFeedback extends Activity{
     private ImageButton commentButton;
     private EditText editText;
     private TextView commentTextLable;
+    private TextView countTextLable;
     private View editGroup;
 
     private Bitmap bitmapMaster;
@@ -96,6 +97,7 @@ public class EditFeedback extends Activity{
         commentButton = (ImageButton) findViewById(R.id.commentButton);
         editText = (EditText) findViewById(R.id.edit_text);
         commentTextLable = (TextView) findViewById(R.id.comment_text);
+        countTextLable = (TextView) findViewById(R.id.count_text);
         editGroup = findViewById(R.id.textLayout);
 
         editGroup.setVisibility(View.GONE);
@@ -174,11 +176,11 @@ public class EditFeedback extends Activity{
 
             /**
              * Method adds character count
-             * @param s
+             * @param text
              */
             @Override
-            public void afterTextChanged(Editable s){
-                commentTextLable.setText("COMMENT #"+count + " : [ " + (120 - s.toString().length()) + "/120 ]" );
+            public void afterTextChanged(Editable text){
+                countTextLable.setText(""+text.toString().length() + "/120" );
             }
         });
 
