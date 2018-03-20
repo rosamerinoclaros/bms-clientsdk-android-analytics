@@ -10,12 +10,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -43,6 +47,7 @@ public class EditFeedback extends Activity{
     private ImageButton commentButton;
     private EditText editText;
     private TextView commentTextLable;
+    private TextView countTextLable;
     private View editGroup;
 
     private Bitmap bitmapMaster;
@@ -67,6 +72,11 @@ public class EditFeedback extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.edit_feedback);
 
         Button sendButton;
@@ -87,6 +97,7 @@ public class EditFeedback extends Activity{
         commentButton = (ImageButton) findViewById(R.id.commentButton);
         editText = (EditText) findViewById(R.id.edit_text);
         commentTextLable = (TextView) findViewById(R.id.comment_text);
+        countTextLable = (TextView) findViewById(R.id.count_text);
         editGroup = findViewById(R.id.textLayout);
 
         editGroup.setVisibility(View.GONE);
@@ -97,7 +108,6 @@ public class EditFeedback extends Activity{
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
-        //getWindow().setLayout((int)(width*0.9),(int)(height*0.9));
         getWindow().setLayout(width,height);
 
         imageView.getLayoutParams().height = (int)(getWindowManager().getDefaultDisplay().getHeight() * 0.90);
@@ -119,6 +129,8 @@ public class EditFeedback extends Activity{
         paintBlur.setColor(Color.parseColor("#7998a8"));
         paintBlur.setStrokeWidth(50);
 
+        editText.setHorizontallyScrolling(false);
+        editText.setMaxLines(Integer.MAX_VALUE);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -134,6 +146,41 @@ public class EditFeedback extends Activity{
                     handled = true;
                 }
                 return handled;
+            }
+        });
+
+        editText.addTextChangedListener(new TextWatcher(){
+            /**
+             * Intentionally method not implemented since nothing to implement
+             * @param s
+             * @param start
+             * @param before
+             * @param count
+             */
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count){
+                //Nothing to implement
+            }
+
+            /**
+             * Intentionally method not implemented since nothing to implement
+             * @param s
+             * @param start
+             * @param count
+             * @param aft
+             */
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int aft){
+                //Nothing to implement
+            }
+
+            /**
+             * Method adds character count
+             * @param text
+             */
+            @Override
+            public void afterTextChanged(Editable text){
+                countTextLable.setText(""+text.toString().length() + "/120" );
             }
         });
 

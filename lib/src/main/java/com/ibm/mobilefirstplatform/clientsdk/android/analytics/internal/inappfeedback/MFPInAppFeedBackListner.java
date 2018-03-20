@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 
 public class MFPInAppFeedBackListner {
 
     private static Activity currentActivity = null;
 
+    protected static final String LOG_TAG_NAME = MFPInAppFeedBackListner.class.getName();
     private static Context context = null;
     private static String userIdentity = "undefined";
 
@@ -34,9 +36,15 @@ public class MFPInAppFeedBackListner {
 
     public static void triggerFeedbackMode(final Activity activity){
 
-        if(null != MFPInAppFeedBackListner.context) {
+        if(null != MFPInAppFeedBackListner.context && null != activity) {
             currentActivity = activity;
             callFeedbackEditScreenActivity();
+        }else {
+            if(null == MFPInAppFeedBackListner.context ) {
+                Log.d(LOG_TAG_NAME, "Failed to invoke feedback mode since application Context is null. Please initialise Analytics to invoke Feedback mode.");
+            }else {
+                Log.d(LOG_TAG_NAME, "Failed to invoke feedback mode since current activity object is not available.");
+            }
         }
     }
 

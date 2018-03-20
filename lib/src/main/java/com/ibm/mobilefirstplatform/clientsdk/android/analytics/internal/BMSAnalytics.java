@@ -326,7 +326,7 @@ public class BMSAnalytics {
             logger.debug("JSONException encountered logging change in user context: " + e.getMessage());
         }
 
-        MFPInAppFeedBackListner.setUserIdentity(hashedUserID);
+        MFPInAppFeedBackListner.setUserIdentity(user);
         log(metadata);
     }
 
@@ -334,7 +334,14 @@ public class BMSAnalytics {
      * Invoke feedback mode
      */
     public static void triggerFeedbackMode(){
-         MFPInAppFeedBackListner.triggerFeedbackMode(currentActivity);
+         BMSAnalytics.triggerFeedbackMode(currentActivity);
+    }
+
+    /**
+     * Invoke feedback mode
+     */
+    public static void triggerFeedbackMode(Activity userActivity){
+        MFPInAppFeedBackListner.triggerFeedbackMode(userActivity);
     }
 
     /**
